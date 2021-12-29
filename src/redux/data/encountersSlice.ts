@@ -27,6 +27,6 @@ export const encountersSlice = createSlice({
 });
 
 export const { addEncounter, removeEncounter } = encountersSlice.actions;
-export const selectEncounters = (state: RootState) => state.encounters;
+export const { selectAll: selectAllEncounters } = encountersAdapter.getSelectors<RootState>((state) => state.encounters);
 
 export default encountersSlice.reducer;
