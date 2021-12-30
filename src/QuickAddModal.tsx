@@ -33,7 +33,7 @@ const QuickAddModal: React.FunctionComponent = () => {
       initiative
     };
 
-    if (editMode === false) {
+    if (!editMode) {
       dispatch(addCreature(creature));
     } else {
       dispatch(editCreature({ index: editIndex, creature }));

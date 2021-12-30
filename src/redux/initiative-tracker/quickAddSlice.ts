@@ -22,35 +22,25 @@ export const quickAddSlice = createSlice({
     changeAc: (state, action: PayloadAction<number>) => {
       if (isNaN(action.payload)) {
         return;
-      } else {
-        state.ac = action.payload;
       }
+      state.ac = action.payload;
     },
     changeMaxHp: (state, action: PayloadAction<number>) => {
       if (isNaN(action.payload)) {
         return;
-      } else {
-        state.maxHp = action.payload;
       }
+      state.maxHp = action.payload;
     },
     changeInitiative: (state, action: PayloadAction<number>) => {
       if (isNaN(action.payload)) {
         return;
-      } else {
-        state.initiative = action.payload;
       }
+      state.initiative = action.payload;
     },
     open: (state) => {
       state.modalOpen = true;
     },
-    close: (state) => {
-      state.modalOpen = false;
-      state.name = "";
-      state.ac = 0;
-      state.maxHp = 0;
-      state.initiative = 0;
-      state.editingMode = false;
-    },
+    close: () => JSON.parse(JSON.stringify(initialState)),
     edit: (state, action: PayloadAction<{ index: number; creature: InitiativeCreature }>) => {
       state.editingMode = true;
       state.name = action.payload.creature.name ?? "";
@@ -63,14 +53,13 @@ export const quickAddSlice = createSlice({
   }
 });
 
-export const { changeName, changeAc, changeMaxHp, changeInitiative } = quickAddSlice.actions;
-export const { open, close, edit } = quickAddSlice.actions;
-export const selectName = (state: RootState) => state.quickAdd.name;
-export const selectAc = (state: RootState) => state.quickAdd.ac;
-export const selectMaxHp = (state: RootState) => state.quickAdd.maxHp;
-export const selectInitiative = (state: RootState) => state.quickAdd.initiative;
-export const selectOpen = (state: RootState) => state.quickAdd.modalOpen;
-export const selectEditingMode = (state: RootState) => state.quickAdd.editingMode;
-export const selectEditIndex = (state: RootState) => state.quickAdd.editIndex;
+export const { changeName, changeAc, changeMaxHp, changeInitiative, open, close, edit } = quickAddSlice.actions;
+export const selectName = (state: RootState): string => state.quickAdd.name;
+export const selectAc = (state: RootState): number => state.quickAdd.ac;
+export const selectMaxHp = (state: RootState): number => state.quickAdd.maxHp;
+export const selectInitiative = (state: RootState): number => state.quickAdd.initiative;
+export const selectOpen = (state: RootState): boolean => state.quickAdd.modalOpen;
+export const selectEditingMode = (state: RootState): boolean => state.quickAdd.editingMode;
+export const selectEditIndex = (state: RootState): number => state.quickAdd.editIndex;
 
 export default quickAddSlice.reducer;
