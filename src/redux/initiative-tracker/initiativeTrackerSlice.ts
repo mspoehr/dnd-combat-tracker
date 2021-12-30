@@ -1,4 +1,4 @@
-import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Creature } from "../models";
 import { RootState } from "../store";
 
@@ -13,13 +13,24 @@ const initialState = {
   round: 0
 };
 
+function sortInitiativeCreatures(creatures: InitiativeCreature[]) {
+  creatures.sort((a, b) => (b.initiative ?? 0) - (a.initiative ?? 0));
+  return creatures;
+}
+
 export const initiativeTrackerSlice = createSlice({
   name: "initiativeTracker",
   initialState,
   reducers: {
     addCreature: (state, action: PayloadAction<InitiativeCreature>) => {
       const creature = action.payload;
-      state.creatures.push(creature);
+
+      // Re-sort the creatures according to the new initiative order
+      const allCreatures = [...state.creatures, creature];
+      state.creatures = sortInitiativeCreatures(allCreatures);
+    },
+    deleteCreature: (state, action: PayloadAction<number>) => {
+      state.creatures.splice(action.payload, 1);
     },
     next: (state) => {
       state.currentTurn = (state.currentTurn + 1) % state.creatures.length;
@@ -30,13 +41,9 @@ export const initiativeTrackerSlice = createSlice({
   }
 });
 
-export const { addCreature, next } = initiativeTrackerSlice.actions;
+export const { addCreature, deleteCreature, next } = initiativeTrackerSlice.actions;
 export const selectInitiativeTurn = (state: RootState): number => state.initiativeTracker.currentTurn;
 export const selectInitiativeRound = (state: RootState): number => state.initiativeTracker.round;
 export const selectInitiativeCreatures = (state: RootState): InitiativeCreature[] => state.initiativeTracker.creatures;
-
-export const selectSortedInitiativeCreatures = createSelector(selectInitiativeCreatures, (creatures) =>
-  [...creatures].sort((a, b) => (b.initiative ?? 0) - (a.initiative ?? 0))
-);
 
 export default initiativeTrackerSlice.reducer;

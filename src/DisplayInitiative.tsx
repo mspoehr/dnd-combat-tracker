@@ -3,13 +3,15 @@ import { Button, Table } from "react-bootstrap";
 
 import { useState } from "react";
 import QuickAddModal from "./QuickAddModal";
-import { useAppSelector } from "./redux/store";
-import { selectSortedInitiativeCreatures } from "./redux/initiative-tracker/initiativeTrackerSlice";
+import { useAppDispatch, useAppSelector } from "./redux/store";
+import { deleteCreature, selectInitiativeCreatures } from "./redux/initiative-tracker/initiativeTrackerSlice";
 
 const DisplayInitiative: React.FunctionComponent = () => {
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const handleClose = () => setQuickAddOpen(false);
-  const initiativeCreatures = useAppSelector(selectSortedInitiativeCreatures);
+  const initiativeCreatures = useAppSelector(selectInitiativeCreatures);
+
+  const dispatch = useAppDispatch();
 
   return (
     <div>
@@ -38,6 +40,14 @@ const DisplayInitiative: React.FunctionComponent = () => {
               <td>{creature.maxHp}</td>
               <td>{creature.initiative}</td>
               <td>0</td>
+              <td>
+                <Button onClick={() => alert("Not implemented yet!")}>Edit</Button>
+              </td>
+              <td>
+                <Button variant="danger" onClick={() => dispatch(deleteCreature(index))}>
+                  Delete
+                </Button>
+              </td>
             </tr>
           ))}
         </tbody>
