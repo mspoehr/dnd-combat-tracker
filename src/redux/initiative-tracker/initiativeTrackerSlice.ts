@@ -91,11 +91,19 @@ export const initiativeTrackerSlice = createSlice({
       const index = adjustedCreatureIndex(state, action.payload.index);
       state.creatures[index].initiative = newInitiative === "" ? undefined : Number(newInitiative);
       sortInitiativeCreatures(state.creatures);
+    },
+    rollAllInitiative: (state) => {
+      state.creatures.forEach((creature) => {
+        const min = Math.ceil(0);
+        const max = Math.floor(20);
+        creature.initiative = Math.floor(Math.random() * (max - min + 1) + min);
+        sortInitiativeCreatures(state.creatures);
+      });
     }
   }
 });
 
-export const { addCreature, deleteCreature, editCreature, changeInitiative, next, previous } =
+export const { addCreature, deleteCreature, editCreature, changeInitiative, next, previous, rollAllInitiative } =
   initiativeTrackerSlice.actions;
 export const selectInitiativeTurn = (state: RootState): number => state.initiativeTracker.currentTurn;
 export const selectInitiativeRound = (state: RootState): number => state.initiativeTracker.round;
