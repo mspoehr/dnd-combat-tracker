@@ -3,12 +3,14 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import encountersSlice from "./data/encountersSlice";
 import monstersSlice from "./data/monstersSlice";
 import initiativeTrackerSlice from "./initiative-tracker/initiativeTrackerSlice";
+import quickAddSlice from "./initiative-tracker/quickAddSlice";
 
 export const store = configureStore({
   reducer: {
     encounters: encountersSlice,
     monsters: monstersSlice,
-    initiativeTracker: initiativeTrackerSlice
+    initiativeTracker: initiativeTrackerSlice,
+    quickAdd: quickAddSlice
   }
 });
 

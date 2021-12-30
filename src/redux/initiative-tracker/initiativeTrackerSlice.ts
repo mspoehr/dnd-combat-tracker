@@ -32,6 +32,10 @@ export const initiativeTrackerSlice = createSlice({
     deleteCreature: (state, action: PayloadAction<number>) => {
       state.creatures.splice(action.payload, 1);
     },
+    editCreature: (state, action: PayloadAction<{ index: number; creature: InitiativeCreature }>) => {
+      state.creatures[action.payload.index] = action.payload.creature;
+      state.creatures = sortInitiativeCreatures(state.creatures);
+    },
     next: (state) => {
       state.currentTurn = (state.currentTurn + 1) % state.creatures.length;
       if (state.currentTurn === 0) {
@@ -41,7 +45,7 @@ export const initiativeTrackerSlice = createSlice({
   }
 });
 
-export const { addCreature, deleteCreature, next } = initiativeTrackerSlice.actions;
+export const { addCreature, deleteCreature, editCreature, next } = initiativeTrackerSlice.actions;
 export const selectInitiativeTurn = (state: RootState): number => state.initiativeTracker.currentTurn;
 export const selectInitiativeRound = (state: RootState): number => state.initiativeTracker.round;
 export const selectInitiativeCreatures = (state: RootState): InitiativeCreature[] => state.initiativeTracker.creatures;

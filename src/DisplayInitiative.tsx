@@ -1,24 +1,22 @@
 import React from "react";
 import { Button, Table } from "react-bootstrap";
 
-import { useState } from "react";
 import QuickAddModal from "./QuickAddModal";
+import { open, edit } from "./redux/initiative-tracker/quickAddSlice";
 import { useAppDispatch, useAppSelector } from "./redux/store";
 import { deleteCreature, selectInitiativeCreatures } from "./redux/initiative-tracker/initiativeTrackerSlice";
 
 const DisplayInitiative: React.FunctionComponent = () => {
-  const [quickAddOpen, setQuickAddOpen] = useState(false);
-  const handleClose = () => setQuickAddOpen(false);
   const initiativeCreatures = useAppSelector(selectInitiativeCreatures);
 
   const dispatch = useAppDispatch();
 
   return (
     <div>
-      <Button variant="outline-primary" size="lg" onClick={() => setQuickAddOpen(true)}>
+      <Button variant="outline-primary" size="lg" onClick={() => dispatch(open())}>
         Quick Add Character
       </Button>
-      <QuickAddModal open={quickAddOpen} close={handleClose} />
+      <QuickAddModal />
 
       <Table striped bordered hover>
         <thead>
@@ -28,7 +26,6 @@ const DisplayInitiative: React.FunctionComponent = () => {
             <th>AC</th>
             <th>Max HP</th>
             <th>Initiative</th>
-            <th>Quantity</th>
           </tr>
         </thead>
         <tbody>
@@ -39,9 +36,8 @@ const DisplayInitiative: React.FunctionComponent = () => {
               <td>{creature.ac}</td>
               <td>{creature.maxHp}</td>
               <td>{creature.initiative}</td>
-              <td>0</td>
               <td>
-                <Button onClick={() => alert("Not implemented yet!")}>Edit</Button>
+                <Button onClick={() => dispatch(edit({ index, creature }))}>Edit</Button>
               </td>
               <td>
                 <Button variant="danger" onClick={() => dispatch(deleteCreature(index))}>
