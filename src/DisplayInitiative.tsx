@@ -7,7 +7,6 @@ import { useAppSelector } from "./redux/store";
 import { selectSortedInitiativeCreatures } from "./redux/initiative-tracker/initiativeTrackerSlice";
 
 const DisplayInitiative: React.FunctionComponent = () => {
-  // const dispatch = useAppDispatch();
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const handleClose = () => setQuickAddOpen(false);
   const initiativeCreatures = useAppSelector(selectSortedInitiativeCreatures);
@@ -18,7 +17,6 @@ const DisplayInitiative: React.FunctionComponent = () => {
         Quick Add Character
       </Button>
       <QuickAddModal open={quickAddOpen} close={handleClose} />
-      {}
 
       <Table striped bordered hover>
         <thead>

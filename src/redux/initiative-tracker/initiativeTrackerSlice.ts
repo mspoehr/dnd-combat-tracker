@@ -19,7 +19,6 @@ export const initiativeTrackerSlice = createSlice({
   reducers: {
     addCreature: (state, action: PayloadAction<InitiativeCreature>) => {
       const creature = action.payload;
-      // creature.currentHp ||= 0;
       state.creatures.push(creature);
     },
     next: (state) => {
