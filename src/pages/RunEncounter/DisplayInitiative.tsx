@@ -8,7 +8,8 @@ import {
   changeInitiative,
   deleteCreature,
   InitiativeCreature as InitiativeCreatureType,
-  selectSortedInitiativeCreatures
+  selectSortedInitiativeCreatures,
+  rollAllInitiative
 } from "../../redux/initiative-tracker/initiativeTrackerSlice";
 
 import "./DisplayInitiative.css";
@@ -57,7 +58,10 @@ const DisplayInitiative: React.FunctionComponent = () => {
 
   return (
     <div>
-      <Button onClick={() => dispatch(open())}>Quick Add Character</Button>
+      <Stack direction="horizontal" gap={2}>
+        <Button onClick={() => dispatch(open())}>Quick Add Character</Button>
+        <Button onClick={() => dispatch(rollAllInitiative())}>Roll Initiative</Button>
+      </Stack>
       <QuickAddModal />
 
       <div>
