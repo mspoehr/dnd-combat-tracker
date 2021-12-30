@@ -18,7 +18,8 @@
   background: lightgray;
 }
 
-.initiative-creature > div:first-child > div {
+.initiative-creature > div:first-child > div,
+.initiative-creature > div:last-child > div {
   display: flex;
   flex-direction: column;
   text-align: center;

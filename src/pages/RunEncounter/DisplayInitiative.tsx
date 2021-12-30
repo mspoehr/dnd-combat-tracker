@@ -13,6 +13,7 @@ import {
 } from "../../redux/initiative-tracker/initiativeTrackerSlice";
 
 import "./DisplayInitiative.css";
+import CreatureHealthTracker from "./CreatureHealthTracker";
 
 function InitiativeCreature(props: { creature: InitiativeCreatureType; index: number }) {
   const dispatch = useAppDispatch();
@@ -45,9 +46,7 @@ function InitiativeCreature(props: { creature: InitiativeCreatureType; index: nu
         </Stack>
       </div>
       <div>
-        <div>
-          {props.creature.currentHp} / {props.creature.maxHp}
-        </div>
+        <CreatureHealthTracker index={props.index} creature={props.creature} />
       </div>
     </div>
   );

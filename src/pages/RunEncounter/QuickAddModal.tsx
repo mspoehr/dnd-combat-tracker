@@ -30,7 +30,8 @@ const QuickAddModal: React.FunctionComponent = () => {
       name,
       ac,
       maxHp,
-      initiative
+      initiative,
+      currentHp: maxHp
     };
 
     if (!editMode) {

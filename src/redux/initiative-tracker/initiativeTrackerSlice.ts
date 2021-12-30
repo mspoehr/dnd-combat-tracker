@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 
 export interface InitiativeCreature extends Partial<Creature> {
   initiative?: number | undefined;
-  currentHp?: number;
+  currentHp: number;
 }
 
 const initialState = {
@@ -98,12 +98,20 @@ export const initiativeTrackerSlice = createSlice({
         const max = 20;
         creature.initiative = Math.floor(Math.random() * (max - min + 1) + min);
         sortInitiativeCreatures(state.creatures);
-      });
+      }
+    },
+    adjustCreatureHealth: (state, action: PayloadAction<{ index: number; amount: number }>) => {
+      const index = adjustedCreatureIndex(state, action.payload.index);
+
+      const hp = state.creatures[index].currentHp + action.payload.amount;
+      const clamp = (num: number, min: number, max: number) => Math.min(Math.max(num, min), max);
+
+      state.creatures[index].currentHp = clamp(hp, 0, state.creatures[index].maxHp ?? 0);
     }
   }
 });
 
-export const { addCreature, deleteCreature, editCreature, changeInitiative, next, previous, rollAllInitiative } =
+export const { addCreature, deleteCreature, editCreature, changeInitiative, next, previous, adjustCreatureHealth, rollAllInitiative } =
   initiativeTrackerSlice.actions;
 export const selectInitiativeTurn = (state: RootState): number => state.initiativeTracker.currentTurn;
 export const selectInitiativeRound = (state: RootState): number => state.initiativeTracker.round;
