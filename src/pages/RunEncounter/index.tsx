@@ -13,7 +13,7 @@ function Counter(props: { text: string; value: number }) {
   return (
     <div className="text-center fw-bold">
       <div>{props.text}</div>
-      <div style={{ fontSize: "1.5em" }}>{props.value}</div>
+      <div style={{ fontSize: "1.5em" }}>{props.value + 1}</div>
     </div>
   );
 }

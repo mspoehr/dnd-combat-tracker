@@ -1,6 +1,7 @@
 import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Creature } from "../models";
 import { RootState } from "../store";
+import { v4 as uuidv4 } from "uuid";
 
 export interface InitiativeCreature extends Partial<Creature> {
   initiative?: number | undefined;
@@ -27,12 +28,39 @@ export const initiativeTrackerSlice = createSlice({
   initialState,
   reducers: {
     addCreature: (state, action: PayloadAction<InitiativeCreature>) => {
+      action.payload.uuid = uuidv4();
+
+      const currentTurnUuid = state.creatures[state.currentTurn]?.uuid;
+
       state.creatures.push(action.payload);
       sortInitiativeCreatures(state.creatures);
+
+      // If combat has started, preserve the turn of the creature whose turn it currently is
+      if (state.creatures.length > 1 && (state.currentTurn !== 0 || state.round !== 0)) {
+        state.currentTurn = state.creatures.findIndex((creature) => creature.uuid === currentTurnUuid);
+      }
     },
     deleteCreature: (state, action: PayloadAction<number>) => {
+      const currentTurnUuid = state.creatures[state.currentTurn]?.uuid;
+
       const index = adjustedCreatureIndex(state, action.payload);
       state.creatures.splice(index, 1);
+
+      // If combat has started, preserve the turn of the creature whose turn it currently is, unless they were just deleted
+      if (state.creatures.length > 1 && (state.currentTurn !== 0 || state.round !== 0)) {
+        const newTurn = state.creatures.findIndex((creature) => creature.uuid === currentTurnUuid);
+        if (newTurn !== -1) {
+          state.currentTurn = newTurn;
+        }
+      }
+    },
+    editCreature: (state, action: PayloadAction<{ index: number; creature: InitiativeCreature }>) => {
+      const index = adjustedCreatureIndex(state, action.payload.index);
+      state.creatures[index] = {
+        ...state.creatures[index],
+        ...action.payload.creature
+      };
+      state.creatures = sortInitiativeCreatures(state.creatures);
     },
     previous: (state) => {
       state.currentTurn--;
@@ -47,10 +75,6 @@ export const initiativeTrackerSlice = createSlice({
       if (state.round < 0) {
         state.round = 0;
       }
-    },
-    editCreature: (state, action: PayloadAction<{ index: number; creature: InitiativeCreature }>) => {
-      state.creatures[action.payload.index] = action.payload.creature;
-      state.creatures = sortInitiativeCreatures(state.creatures);
     },
     next: (state) => {
       state.currentTurn = (state.currentTurn + 1) % Math.max(state.creatures.length, 1);

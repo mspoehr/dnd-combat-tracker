@@ -63,7 +63,7 @@ const DisplayInitiative: React.FunctionComponent = () => {
 
       <div>
         {initiativeCreatures.map((creature, index) => (
-          <InitiativeCreature key={creature.name ?? "" + index} creature={creature} index={index} />
+          <InitiativeCreature key={creature.uuid} creature={creature} index={index} />
         ))}
       </div>
     </div>
