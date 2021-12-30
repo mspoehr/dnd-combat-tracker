@@ -1,8 +1,20 @@
 import React from "react";
-import { useState } from "react";
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import { addCreature, InitiativeCreature } from "./redux/initiative-tracker/initiativeTrackerSlice";
-import { useAppDispatch } from "./redux/store";
+import {
+  changeName,
+  changeAc,
+  changeMaxHp,
+  changeInitiative,
+  changeQuantity,
+  selectAc,
+  selectInitiative,
+  selectMaxHp,
+  selectName,
+  selectQuantity,
+  setInitialState
+} from "./redux/initiative-tracker/quickAddSlice";
+import { useAppDispatch, useAppSelector } from "./redux/store";
 
 interface QuickAddModalProps {
   open: boolean;
@@ -10,12 +22,11 @@ interface QuickAddModalProps {
 }
 
 const QuickAddModal: React.FunctionComponent<QuickAddModalProps> = (props) => {
-  const [name, setName] = useState("");
-  const [ac, setAC] = useState(0);
-  const [maxHp, setMaxHP] = useState(0);
-  const [initiative, setInitiative] = useState(0);
-  const [quantity, setQuantity] = useState(0);
-
+  const name = useAppSelector(selectName);
+  const ac = useAppSelector(selectAc);
+  const maxHp = useAppSelector(selectMaxHp);
+  const initiative = useAppSelector(selectInitiative);
+  const quantity = useAppSelector(selectQuantity);
   const dispatch = useAppDispatch();
   const save = () => {
     const creature: InitiativeCreature = {
@@ -26,8 +37,12 @@ const QuickAddModal: React.FunctionComponent<QuickAddModalProps> = (props) => {
     };
 
     dispatch(addCreature(creature));
+
+    dispatch(setInitialState());
     props.close();
   };
+
+  // const reset = () => {};
 
   return (
     <Modal show={props.open} onHide={props.close}>
@@ -43,7 +58,7 @@ const QuickAddModal: React.FunctionComponent<QuickAddModalProps> = (props) => {
                 <Form.Control
                   value={name}
                   onChange={(e) => {
-                    setName(e.target.value);
+                    dispatch(changeName(e.target.value));
                   }}
                   type="text"
                 ></Form.Control>
@@ -55,7 +70,7 @@ const QuickAddModal: React.FunctionComponent<QuickAddModalProps> = (props) => {
                 <Form.Control
                   value={ac}
                   onChange={(e) => {
-                    setAC(Number(e.target.value));
+                    dispatch(changeAc(Number(e.target.value)));
                   }}
                   type="number"
                 ></Form.Control>
@@ -69,7 +84,7 @@ const QuickAddModal: React.FunctionComponent<QuickAddModalProps> = (props) => {
                 <Form.Control
                   value={maxHp}
                   onChange={(e) => {
-                    setMaxHP(Number(e.target.value));
+                    dispatch(changeMaxHp(Number(e.target.value)));
                   }}
                   type="number"
                 ></Form.Control>
@@ -81,7 +96,7 @@ const QuickAddModal: React.FunctionComponent<QuickAddModalProps> = (props) => {
                 <Form.Control
                   value={initiative}
                   onChange={(e) => {
-                    setInitiative(Number(e.target.value));
+                    dispatch(changeInitiative(Number(e.target.value)));
                   }}
                   type="number"
                 ></Form.Control>
@@ -95,7 +110,7 @@ const QuickAddModal: React.FunctionComponent<QuickAddModalProps> = (props) => {
                 <Form.Control
                   value={quantity}
                   onChange={(e) => {
-                    setQuantity(Number(e.target.value));
+                    dispatch(changeQuantity(Number(e.target.value)));
                   }}
                   type="number"
                 ></Form.Control>

@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Creature } from "../models";
 import { RootState } from "../store";
 
@@ -45,5 +45,14 @@ export const { addCreature, deleteCreature, next } = initiativeTrackerSlice.acti
 export const selectInitiativeTurn = (state: RootState): number => state.initiativeTracker.currentTurn;
 export const selectInitiativeRound = (state: RootState): number => state.initiativeTracker.round;
 export const selectInitiativeCreatures = (state: RootState): InitiativeCreature[] => state.initiativeTracker.creatures;
+
+export const selectSortedInitiativeCreatures = createSelector(
+  selectInitiativeCreatures,
+  selectInitiativeTurn,
+  (creatures, turn) => {
+    const sorted = [...creatures].sort((a, b) => (b.initiative ?? 0) - (a.initiative ?? 0));
+    return sorted.slice(turn).concat(sorted.slice(0, turn));
+  }
+);
 
 export default initiativeTrackerSlice.reducer;
