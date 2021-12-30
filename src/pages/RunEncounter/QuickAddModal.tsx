@@ -1,6 +1,6 @@
 import React from "react";
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
-import { addCreature, InitiativeCreature, editCreature } from "./redux/initiative-tracker/initiativeTrackerSlice";
+import { addCreature, InitiativeCreature, editCreature } from "../../redux/initiative-tracker/initiativeTrackerSlice";
 import {
   changeName,
   changeAc,
@@ -14,8 +14,8 @@ import {
   selectOpen,
   selectEditingMode,
   selectEditIndex
-} from "./redux/initiative-tracker/quickAddSlice";
-import { useAppDispatch, useAppSelector } from "./redux/store";
+} from "../../redux/initiative-tracker/quickAddSlice";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 
 const QuickAddModal: React.FunctionComponent = () => {
   const name = useAppSelector(selectName);
