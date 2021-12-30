@@ -23,6 +23,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noemit",
     "prettier-format": "prettier --config .prettierrc '**/*.{js,jsx,ts,tsx,json}' --write"
   },
@@ -47,7 +48,10 @@
     "@types/node": "^12.0.0",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
-    "husky": "^7.0.4"
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "husky": "^7.0.4",
+    "prettier": "^2.5.1"
   },
   "husky": {
     "hooks": {

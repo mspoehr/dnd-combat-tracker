@@ -1,7 +1,7 @@
-import { createEntityAdapter, createSlice } from '@reduxjs/toolkit';
-import { RootState } from '../store';
+import { createEntityAdapter, createSlice } from "@reduxjs/toolkit";
+import { RootState } from "../store";
 import naturalCompare from "string-natural-compare";
-import { UniqueEntity, UniqueIdType } from '../models';
+import { UniqueEntity, UniqueIdType } from "../models";
 
 export interface EncounterCreature {
   creatureUuid: UniqueIdType;
@@ -15,10 +15,10 @@ export interface Encounter extends UniqueEntity {
 export const encountersAdapter = createEntityAdapter<Encounter>({
   selectId: (encounter) => encounter.uuid,
   sortComparer: (a, b) => naturalCompare(a.name, b.name, { caseInsensitive: true })
-})
+});
 
 export const encountersSlice = createSlice({
-  name: 'encounters',
+  name: "encounters",
   initialState: encountersAdapter.getInitialState,
   reducers: {
     addEncounter: encountersAdapter.addOne,
@@ -27,6 +27,8 @@ export const encountersSlice = createSlice({
 });
 
 export const { addEncounter, removeEncounter } = encountersSlice.actions;
-export const { selectAll: selectAllEncounters } = encountersAdapter.getSelectors<RootState>((state) => state.encounters);
+export const { selectAll: selectAllEncounters } = encountersAdapter.getSelectors<RootState>(
+  (state) => state.encounters
+);
 
 export default encountersSlice.reducer;
