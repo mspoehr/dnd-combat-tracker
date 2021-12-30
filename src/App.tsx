@@ -13,7 +13,8 @@ const App: React.FunctionComponent = () => (
   <BrowserRouter>
     <Routes>
       <Route path="/" element={<DndCombatTracker />}>
-        <Route path="encounters" element={<Navigate replace to="/" />}>
+        <Route path="encounters">
+          <Route index element={<Navigate replace to="/" />} />
           <Route path=":id">
             <Route index element={<EditEncounter />} />
             <Route path="run" element={<RunEncounter />} />
