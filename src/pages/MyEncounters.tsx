@@ -1,6 +1,7 @@
 import React from "react";
 
 import { Alert, Button, Col, Container, Row, Stack } from "react-bootstrap";
+import { Link } from "react-router-dom";
 import { selectAllEncounters } from "../redux/data/encountersSlice";
 import { useAppSelector } from "../redux/store";
 
@@ -24,7 +25,9 @@ const MyEncounters: React.FunctionComponent = () => (
         </Col>
         <Col md="auto">
           <Stack direction="horizontal" gap={2}>
-            <Button variant="outline-primary">Quick Run Encounter</Button>
+            <Link to="/encounters/quick/run">
+              <Button variant="outline-primary">Quick Run Encounter</Button>
+            </Link>
             <Button variant="primary" onClick={() => alert("Not implemented yet!")}>
               Add Encounter
             </Button>

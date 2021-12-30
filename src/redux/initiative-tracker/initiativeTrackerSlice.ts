@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Creature } from "../models";
+import { RootState } from "../store";
 
 interface InitiativeCreature extends Partial<Creature> {
   initiative?: number;
@@ -13,7 +14,7 @@ const initialState = {
 };
 
 export const initiativeTrackerSlice = createSlice({
-  name: "monsters",
+  name: "initiativeTracker",
   initialState,
   reducers: {
     addCreature: (state, action: PayloadAction<Partial<Creature>>) => {
@@ -24,10 +25,18 @@ export const initiativeTrackerSlice = createSlice({
         ...creature
       };
       state.creatures.push(initiativeCreature);
+    },
+    next: (state) => {
+      state.currentTurn = (state.currentTurn + 1) % state.creatures.length;
+      if (state.currentTurn === 0) {
+        state.round += 1;
+      }
     }
   }
 });
 
-export const { addCreature } = initiativeTrackerSlice.actions;
+export const { addCreature, next } = initiativeTrackerSlice.actions;
+export const selectInitiativeTurn = (state: RootState): number => state.initiativeTracker.currentTurn;
+export const selectInitiativeRound = (state: RootState): number => state.initiativeTracker.round;
 
 export default initiativeTrackerSlice.reducer;
