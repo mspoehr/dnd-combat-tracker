@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Col, Form, Row, Stack } from "react-bootstrap";
+import { Button, Form, Stack } from "react-bootstrap";
 
 import QuickAddModal from "./QuickAddModal";
 import { open, edit } from "../../redux/initiative-tracker/quickAddSlice";
@@ -59,17 +59,11 @@ const DisplayInitiative: React.FunctionComponent = () => {
 
   return (
     <div>
-      <Row>
-        <Col md="auto">
-          <Button onClick={() => dispatch(open())}>Quick Add Character</Button>
-        </Col>
-        <Col md="auto">
-          <Button onClick={() => dispatch(rollAllInitiative())}>Roll Initiative</Button>
-        </Col>
-      </Row>
-      <Row>
-        <QuickAddModal />
-      </Row>
+      <Stack direction="horizontal" gap={2}>
+        <Button onClick={() => dispatch(open())}>Quick Add Character</Button>
+        <Button onClick={() => dispatch(rollAllInitiative())}>Roll Initiative</Button>
+      </Stack>
+      <QuickAddModal />
 
       <div>
         {initiativeCreatures.map((creature, index) => (

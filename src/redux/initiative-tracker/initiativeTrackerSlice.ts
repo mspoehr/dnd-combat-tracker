@@ -94,8 +94,8 @@ export const initiativeTrackerSlice = createSlice({
     },
     rollAllInitiative: (state) => {
       state.creatures.forEach((creature) => {
-        const min = Math.ceil(1);
-        const max = Math.floor(20);
+        const min = 1;
+        const max = 20;
         creature.initiative = Math.floor(Math.random() * (max - min + 1) + min);
         sortInitiativeCreatures(state.creatures);
       });
