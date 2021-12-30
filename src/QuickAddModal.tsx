@@ -1,32 +1,29 @@
 import React from "react";
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
-import { addCreature, InitiativeCreature } from "./redux/initiative-tracker/initiativeTrackerSlice";
+import { addCreature, InitiativeCreature, editCreature } from "./redux/initiative-tracker/initiativeTrackerSlice";
 import {
   changeName,
   changeAc,
   changeMaxHp,
   changeInitiative,
-  changeQuantity,
   selectAc,
   selectInitiative,
   selectMaxHp,
   selectName,
-  selectQuantity,
-  setInitialState
+  close,
+  selectOpen,
+  selectEditingMode,
+  selectEditIndex
 } from "./redux/initiative-tracker/quickAddSlice";
 import { useAppDispatch, useAppSelector } from "./redux/store";
 
-interface QuickAddModalProps {
-  open: boolean;
-  close: () => void;
-}
-
-const QuickAddModal: React.FunctionComponent<QuickAddModalProps> = (props) => {
+const QuickAddModal: React.FunctionComponent = () => {
   const name = useAppSelector(selectName);
   const ac = useAppSelector(selectAc);
   const maxHp = useAppSelector(selectMaxHp);
   const initiative = useAppSelector(selectInitiative);
-  const quantity = useAppSelector(selectQuantity);
+  const editMode = useAppSelector(selectEditingMode);
+  const editIndex = useAppSelector(selectEditIndex);
   const dispatch = useAppDispatch();
   const save = () => {
     const creature: InitiativeCreature = {
@@ -36,16 +33,16 @@ const QuickAddModal: React.FunctionComponent<QuickAddModalProps> = (props) => {
       initiative
     };
 
-    dispatch(addCreature(creature));
-
-    dispatch(setInitialState());
-    props.close();
+    if (editMode === false) {
+      dispatch(addCreature(creature));
+    } else {
+      dispatch(editCreature({ index: editIndex, creature }));
+    }
+    dispatch(close());
   };
 
-  // const reset = () => {};
-
   return (
-    <Modal show={props.open} onHide={props.close}>
+    <Modal show={useAppSelector(selectOpen)} onHide={() => dispatch(close())}>
       <Modal.Header closeButton>
         <Modal.Title>Create New Character</Modal.Title>
       </Modal.Header>
@@ -72,7 +69,7 @@ const QuickAddModal: React.FunctionComponent<QuickAddModalProps> = (props) => {
                   onChange={(e) => {
                     dispatch(changeAc(Number(e.target.value)));
                   }}
-                  type="number"
+                  type="text"
                 ></Form.Control>
               </Form.Group>
             </Col>
@@ -86,7 +83,7 @@ const QuickAddModal: React.FunctionComponent<QuickAddModalProps> = (props) => {
                   onChange={(e) => {
                     dispatch(changeMaxHp(Number(e.target.value)));
                   }}
-                  type="number"
+                  type="text"
                 ></Form.Control>
               </Form.Group>
             </Col>
@@ -98,21 +95,7 @@ const QuickAddModal: React.FunctionComponent<QuickAddModalProps> = (props) => {
                   onChange={(e) => {
                     dispatch(changeInitiative(Number(e.target.value)));
                   }}
-                  type="number"
-                ></Form.Control>
-              </Form.Group>
-            </Col>
-          </Row>
-          <Row>
-            <Col>
-              <Form.Group className="mv-3" controlId="exampleForm.ControlTextArea1">
-                <Form.Label>Quantity(Optional)</Form.Label>
-                <Form.Control
-                  value={quantity}
-                  onChange={(e) => {
-                    dispatch(changeQuantity(Number(e.target.value)));
-                  }}
-                  type="number"
+                  type="text"
                 ></Form.Control>
               </Form.Group>
             </Col>
@@ -120,7 +103,7 @@ const QuickAddModal: React.FunctionComponent<QuickAddModalProps> = (props) => {
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={props.close}>
+        <Button variant="secondary" onClick={() => dispatch(close())}>
           Close
         </Button>
         <Button variant="primary" onClick={save}>
