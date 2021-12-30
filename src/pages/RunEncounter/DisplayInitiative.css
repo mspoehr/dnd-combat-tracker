@@ -1,0 +1,29 @@
+.initiative-creature {
+  display: flex;
+  align-items: stretch;
+  margin: 1rem;
+  max-width: 450px;
+  border: 1px solid gray;
+}
+
+.initiative-creature > div {
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  position: relative;
+}
+
+.initiative-creature > div:first-child, .initiative-creature > div:last-child {
+  background: lightgray;
+}
+
+.initiative-creature > div:first-child > div {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  position: relative;
+  padding: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+}

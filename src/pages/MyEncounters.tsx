@@ -18,7 +18,7 @@ function EncounterList() {
 
 const MyEncounters: React.FunctionComponent = () => (
   <div>
-    <Container fluid>
+    <Container fluid className="my-3">
       <Row>
         <Col>
           <h1>My Encounters</h1>

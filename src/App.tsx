@@ -5,7 +5,7 @@ import DndCombatTracker from "./pages/DndCombatTracker";
 import EditEncounter from "./pages/EditEncounter";
 import MyEncounters from "./pages/MyEncounters";
 import MyMonsters from "./pages/MyMonsters";
-import RunEncounter from "./pages/RunEncounter";
+import RunEncounter from "./pages/RunEncounter/";
 
 import "./App.css";
 
