@@ -98,7 +98,7 @@ export const initiativeTrackerSlice = createSlice({
         const max = 20;
         creature.initiative = Math.floor(Math.random() * (max - min + 1) + min);
         sortInitiativeCreatures(state.creatures);
-      }
+      });
     },
     adjustCreatureHealth: (state, action: PayloadAction<{ index: number; amount: number }>) => {
       const index = adjustedCreatureIndex(state, action.payload.index);
@@ -111,8 +111,16 @@ export const initiativeTrackerSlice = createSlice({
   }
 });
 
-export const { addCreature, deleteCreature, editCreature, changeInitiative, next, previous, adjustCreatureHealth, rollAllInitiative } =
-  initiativeTrackerSlice.actions;
+export const {
+  addCreature,
+  deleteCreature,
+  editCreature,
+  changeInitiative,
+  next,
+  previous,
+  adjustCreatureHealth,
+  rollAllInitiative
+} = initiativeTrackerSlice.actions;
 export const selectInitiativeTurn = (state: RootState): number => state.initiativeTracker.currentTurn;
 export const selectInitiativeRound = (state: RootState): number => state.initiativeTracker.round;
 export const selectInitiativeCreatures = (state: RootState): InitiativeCreature[] => state.initiativeTracker.creatures;
