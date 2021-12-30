@@ -1,9 +1,10 @@
+import React from "react";
 import { Outlet } from "react-router-dom";
 
-export default function DndCombatTracker() {
-  return (
-    <div style={{ margin: "10px" }}>
-      <Outlet />
-    </div>
-  );
-}
+const DndCombatTracker: React.FunctionComponent = () => (
+  <div style={{ margin: "10px" }}>
+    <Outlet />
+  </div>
+);
+
+export default DndCombatTracker;

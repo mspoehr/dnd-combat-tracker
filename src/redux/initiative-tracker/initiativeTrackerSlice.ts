@@ -1,5 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Creature } from '../models';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Creature } from "../models";
 
 interface InitiativeCreature extends Partial<Creature> {
   initiative?: number;
@@ -13,7 +13,7 @@ const initialState = {
 };
 
 export const initiativeTrackerSlice = createSlice({
-  name: 'monsters',
+  name: "monsters",
   initialState,
   reducers: {
     addCreature: (state, action: PayloadAction<Partial<Creature>>) => {
@@ -22,7 +22,7 @@ export const initiativeTrackerSlice = createSlice({
         initiative: undefined,
         currentHp: creature.maxHp ?? 0,
         ...creature
-      }
+      };
       state.creatures.push(initiativeCreature);
     }
   }

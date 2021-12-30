@@ -1,3 +1,4 @@
+import React from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import DndCombatTracker from "./pages/DndCombatTracker";
@@ -8,23 +9,21 @@ import RunEncounter from "./pages/RunEncounter";
 
 import "./App.css";
 
-function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<DndCombatTracker />}>
-          <Route path="encounters" element={<Navigate replace to="/" />}>
-            <Route path=":id">
-              <Route index element={<EditEncounter />} />
-              <Route path="run" element={<RunEncounter />} />
-            </Route>
+const App: React.FunctionComponent = () => (
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<DndCombatTracker />}>
+        <Route path="encounters" element={<Navigate replace to="/" />}>
+          <Route path=":id">
+            <Route index element={<EditEncounter />} />
+            <Route path="run" element={<RunEncounter />} />
           </Route>
-          <Route path="monsters" element={<MyMonsters />} />
-          <Route index element={<MyEncounters />} />
         </Route>
-      </Routes>
-    </BrowserRouter>
-  );
-}
+        <Route path="monsters" element={<MyMonsters />} />
+        <Route index element={<MyEncounters />} />
+      </Route>
+    </Routes>
+  </BrowserRouter>
+);
 
 export default App;

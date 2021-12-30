@@ -2,7 +2,7 @@ export interface UniqueEntity {
   uuid: string;
 }
 
-export type UniqueIdType = UniqueEntity['uuid'];
+export type UniqueIdType = UniqueEntity["uuid"];
 
 export interface Speed {
   walk: number;
@@ -10,7 +10,7 @@ export interface Speed {
   swim: number;
 }
 
-type CreatureType = 'monster' | 'player';
+type CreatureType = "monster" | "player";
 export interface Creature extends UniqueEntity {
   name: string;
   maxHp: number;
