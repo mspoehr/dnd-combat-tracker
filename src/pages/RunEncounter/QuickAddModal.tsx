@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, Col, Form, Modal, Row } from "react-bootstrap";
+import { Button, ButtonGroup, Col, Form, Modal, Row, ToggleButton } from "react-bootstrap";
 import { addCreature, InitiativeCreature, editCreature } from "../../redux/initiative-tracker/initiativeTrackerSlice";
+import { CreatureType } from "../../redux/models";
 import {
   changeName,
   changeAc,
@@ -13,7 +14,9 @@ import {
   close,
   selectOpen,
   selectEditingMode,
-  selectEditIndex
+  selectEditIndex,
+  selectType,
+  changeType
 } from "../../redux/initiative-tracker/quickAddSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 
@@ -24,14 +27,20 @@ const QuickAddModal: React.FunctionComponent = () => {
   const initiative = useAppSelector(selectInitiative);
   const editMode = useAppSelector(selectEditingMode);
   const editIndex = useAppSelector(selectEditIndex);
+  const type = useAppSelector(selectType);
   const dispatch = useAppDispatch();
+  const radios = [
+    { name: "Player", value: "player" },
+    { name: "Monster", value: "monster" }
+  ];
   const save = () => {
     const creature: InitiativeCreature = {
       name,
       ac,
       maxHp,
       initiative,
-      currentHp: maxHp
+      currentHp: maxHp,
+      type: type
     };
 
     if (!editMode) {
@@ -43,9 +52,9 @@ const QuickAddModal: React.FunctionComponent = () => {
   };
 
   return (
-    <Modal show={useAppSelector(selectOpen)} onHide={() => dispatch(close())}>
+    <Modal size="lg" show={useAppSelector(selectOpen)} onHide={() => dispatch(close())} centered>
       <Modal.Header closeButton>
-        <Modal.Title>Create New Character</Modal.Title>
+        <Modal.Title>Quick Add Creature</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
@@ -74,8 +83,6 @@ const QuickAddModal: React.FunctionComponent = () => {
                 ></Form.Control>
               </Form.Group>
             </Col>
-          </Row>
-          <Row>
             <Col>
               <Form.Group className="mv-3" controlId="exampleForm.ControlTextArea1">
                 <Form.Label>Max HP(Optional)</Form.Label>
@@ -98,6 +105,27 @@ const QuickAddModal: React.FunctionComponent = () => {
                   }}
                   type="text"
                 ></Form.Control>
+              </Form.Group>
+            </Col>
+            <Col>
+              <Form.Group className="mv-3" controlId="exampleForm.ControlTextArea1">
+                <Form.Label>Creature Type</Form.Label>
+                <ButtonGroup>
+                  {radios.map((radio, idx) => (
+                    <ToggleButton
+                      key={idx}
+                      id={`radio-${idx}`}
+                      type="radio"
+                      variant={idx % 2 ? "outline-danger" : "outline-success"}
+                      name="radio"
+                      value={radio.value}
+                      checked={type === (radio.value as CreatureType)}
+                      onChange={(e) => dispatch(changeType(e.currentTarget.value as CreatureType))}
+                    >
+                      {radio.name}
+                    </ToggleButton>
+                  ))}
+                </ButtonGroup>
               </Form.Group>
             </Col>
           </Row>

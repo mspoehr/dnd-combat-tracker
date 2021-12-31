@@ -10,7 +10,7 @@ export interface Speed {
   swim: number;
 }
 
-type CreatureType = "monster" | "player";
+export type CreatureType = "monster" | "player";
 export interface Creature extends UniqueEntity {
   name: string;
   maxHp: number;

@@ -94,10 +94,12 @@ export const initiativeTrackerSlice = createSlice({
     },
     rollAllInitiative: (state) => {
       state.creatures.forEach((creature) => {
-        const min = 1;
-        const max = 20;
-        creature.initiative = Math.floor(Math.random() * (max - min + 1) + min);
-        sortInitiativeCreatures(state.creatures);
+        if (creature.type === "monster") {
+          const min = 1;
+          const max = 20;
+          creature.initiative = Math.floor(Math.random() * (max - min + 1) + min);
+          sortInitiativeCreatures(state.creatures);
+        }
       });
     },
     adjustCreatureHealth: (state, action: PayloadAction<{ index: number; amount: number }>) => {
