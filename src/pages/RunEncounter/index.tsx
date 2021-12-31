@@ -1,11 +1,13 @@
 import React from "react";
-import { Button, Col, Container, Row, Stack } from "react-bootstrap";
+import { Button, Col, Container, Dropdown, DropdownButton, Row, Stack } from "react-bootstrap";
 import DisplayInitiative from "./DisplayInitiative";
 import {
   next,
   previous,
   selectInitiativeRound,
-  selectInitiativeTurn
+  selectInitiativeTurn,
+  restartEncounter,
+  clearEncounter
 } from "../../redux/initiative-tracker/initiativeTrackerSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 
@@ -42,6 +44,14 @@ function InitiativeControlBar() {
               Previous turn
             </Button>
             <Button onClick={() => dispatch(next())}>Next turn</Button>
+            <DropdownButton title="More" variant="secondary">
+              <Dropdown.Item as="button" onClick={() => dispatch(restartEncounter())}>
+                Restart encounter
+              </Dropdown.Item>
+              <Dropdown.Item as="button" onClick={() => dispatch(clearEncounter())}>
+                Clear initiative order
+              </Dropdown.Item>
+            </DropdownButton>
           </Stack>
         </Col>
       </Row>
