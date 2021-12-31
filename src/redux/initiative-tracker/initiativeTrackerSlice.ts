@@ -143,7 +143,15 @@ export const initiativeTrackerSlice = createSlice({
       state.creatures[index].order = state.creatures[newIndex].order + (index < newIndex ? 1 : -1);
 
       sortInitiativeCreatures(state.creatures);
-    }
+    },
+    restartEncounter: (state) => {
+      state.currentTurn = 0;
+      state.round = 0;
+      state.creatures.forEach((creature) => {
+        creature.currentHp = creature.maxHp;
+      });
+    },
+    clearEncounter: () => JSON.parse(JSON.stringify(initialState))
   }
 });
 
@@ -156,7 +164,9 @@ export const {
   previous,
   adjustCreatureHealth,
   rollAllInitiative,
-  reorderCreature
+  reorderCreature,
+  restartEncounter,
+  clearEncounter
 } = initiativeTrackerSlice.actions;
 export const selectInitiativeTurn = (state: RootState): number => state.initiativeTracker.currentTurn;
 export const selectInitiativeRound = (state: RootState): number => state.initiativeTracker.round;
