@@ -3,10 +3,12 @@ import { Creature } from "../models";
 import { RootState } from "../store";
 import { v4 as uuidv4 } from "uuid";
 
-export interface InitiativeCreature extends Partial<Creature> {
-  initiative?: number | undefined;
+export interface InitiativeCreature extends Creature {
+  initiative: number;
+  order: number;
   currentHp: number;
 }
+type InitiativeCreatureExternal = Omit<InitiativeCreature, "uuid" | "order">;
 
 const initialState = {
   creatures: [] as InitiativeCreature[],
@@ -14,9 +16,33 @@ const initialState = {
   round: 0
 };
 
+// Pass creatures as sorted array (initiative descending, order ascending)
+function normalizeCreatureOrders(creatures: InitiativeCreature[]) {
+  let currentOrder = 0;
+  let currentInitiative: number | null = null;
+  creatures.forEach((creature) => {
+    if (creature.initiative !== currentInitiative) {
+      currentInitiative = creature.initiative;
+      currentOrder = 0;
+    } else {
+      currentOrder++;
+    }
+
+    creature.order = currentOrder;
+  });
+}
+
 function sortInitiativeCreatures(creatures: InitiativeCreature[]) {
-  creatures.sort((a, b) => (b.initiative ?? 0) - (a.initiative ?? 0));
-  return creatures;
+  creatures.sort((a, b) => {
+    const initiativeDiff = b.initiative - a.initiative;
+    if (initiativeDiff === 0) {
+      return a.order - b.order;
+    }
+
+    return initiativeDiff;
+  });
+
+  normalizeCreatureOrders(creatures);
 }
 
 function adjustedCreatureIndex(state: RootState["initiativeTracker"], index: number) {
@@ -27,12 +53,11 @@ export const initiativeTrackerSlice = createSlice({
   name: "initiativeTracker",
   initialState,
   reducers: {
-    addCreature: (state, action: PayloadAction<InitiativeCreature>) => {
-      action.payload.uuid = uuidv4();
-
+    addCreature: (state, action: PayloadAction<InitiativeCreatureExternal>) => {
       const currentTurnUuid = state.creatures[state.currentTurn]?.uuid;
 
-      state.creatures.push(action.payload);
+      const creature: InitiativeCreature = { order: 0, uuid: uuidv4(), ...action.payload };
+      state.creatures.push(creature);
       sortInitiativeCreatures(state.creatures);
 
       // If combat has started, preserve the turn of the creature whose turn it currently is
@@ -54,13 +79,13 @@ export const initiativeTrackerSlice = createSlice({
         }
       }
     },
-    editCreature: (state, action: PayloadAction<{ index: number; creature: InitiativeCreature }>) => {
+    editCreature: (state, action: PayloadAction<{ index: number; creature: InitiativeCreatureExternal }>) => {
       const index = adjustedCreatureIndex(state, action.payload.index);
       state.creatures[index] = {
         ...state.creatures[index],
         ...action.payload.creature
       };
-      state.creatures = sortInitiativeCreatures(state.creatures);
+      sortInitiativeCreatures(state.creatures);
     },
     previous: (state) => {
       state.currentTurn--;
@@ -89,7 +114,7 @@ export const initiativeTrackerSlice = createSlice({
       }
 
       const index = adjustedCreatureIndex(state, action.payload.index);
-      state.creatures[index].initiative = newInitiative === "" ? undefined : Number(newInitiative);
+      state.creatures[index].initiative = newInitiative === "" ? 0 : Number(newInitiative);
       sortInitiativeCreatures(state.creatures);
     },
     rollAllInitiative: (state) => {
@@ -108,7 +133,16 @@ export const initiativeTrackerSlice = createSlice({
       const hp = state.creatures[index].currentHp + action.payload.amount;
       const clamp = (num: number, min: number, max: number) => Math.min(Math.max(num, min), max);
 
-      state.creatures[index].currentHp = clamp(hp, 0, state.creatures[index].maxHp ?? 0);
+      state.creatures[index].currentHp = clamp(hp, 0, state.creatures[index].maxHp);
+    },
+    reorderCreature: (state, action: PayloadAction<{ index: number; newIndex: number }>) => {
+      const index = adjustedCreatureIndex(state, action.payload.index);
+      const newIndex = adjustedCreatureIndex(state, action.payload.newIndex);
+
+      state.creatures[index].initiative = state.creatures[newIndex].initiative;
+      state.creatures[index].order = state.creatures[newIndex].order + (index < newIndex ? 1 : -1);
+
+      sortInitiativeCreatures(state.creatures);
     }
   }
 });
@@ -121,7 +155,8 @@ export const {
   next,
   previous,
   adjustCreatureHealth,
-  rollAllInitiative
+  rollAllInitiative,
+  reorderCreature
 } = initiativeTrackerSlice.actions;
 export const selectInitiativeTurn = (state: RootState): number => state.initiativeTracker.currentTurn;
 export const selectInitiativeRound = (state: RootState): number => state.initiativeTracker.round;
