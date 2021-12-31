@@ -54,7 +54,7 @@ const QuickAddModal: React.FunctionComponent = () => {
   return (
     <Modal size="lg" show={useAppSelector(selectOpen)} onHide={() => dispatch(close())} centered>
       <Modal.Header closeButton>
-        <Modal.Title>Create New Character</Modal.Title>
+        <Modal.Title>Quick Add Creature</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
@@ -109,7 +109,7 @@ const QuickAddModal: React.FunctionComponent = () => {
             </Col>
             <Col>
               <Form.Group className="mv-3" controlId="exampleForm.ControlTextArea1">
-                <Form.Label>Player Status</Form.Label>
+                <Form.Label>Creature Type</Form.Label>
                 <ButtonGroup>
                   {radios.map((radio, idx) => (
                     <ToggleButton
