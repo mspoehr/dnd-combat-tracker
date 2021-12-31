@@ -53,11 +53,13 @@ export const initiativeTrackerSlice = createSlice({
   name: "initiativeTracker",
   initialState,
   reducers: {
-    addCreature: (state, action: PayloadAction<InitiativeCreatureExternal>) => {
+    addCreature: (state, action: PayloadAction<{ creature: InitiativeCreatureExternal; quantity: number }>) => {
       const currentTurnUuid = state.creatures[state.currentTurn]?.uuid;
 
-      const creature: InitiativeCreature = { order: 0, uuid: uuidv4(), ...action.payload };
-      state.creatures.push(creature);
+      const creature: InitiativeCreature = { order: 0, uuid: uuidv4(), ...action.payload.creature };
+      for (let i = 0; i < action.payload.quantity; i++) {
+        state.creatures.push(creature);
+      }
       sortInitiativeCreatures(state.creatures);
 
       // If combat has started, preserve the turn of the creature whose turn it currently is

@@ -15,7 +15,9 @@ import {
   selectEditingMode,
   selectEditIndex,
   selectType,
-  changeType
+  changeType,
+  changeQuantity,
+  selectQuantity
 } from "../../redux/initiative-tracker/quickAddSlice";
 import { CreatureType } from "../../redux/models";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
@@ -28,6 +30,7 @@ const QuickAddModal: React.FunctionComponent = () => {
   const editMode = useAppSelector(selectEditingMode);
   const editIndex = useAppSelector(selectEditIndex);
   const type = useAppSelector(selectType);
+  const quantity = useAppSelector(selectQuantity);
   const dispatch = useAppDispatch();
   const radios = [
     { name: "Player", value: "player" },
@@ -44,7 +47,7 @@ const QuickAddModal: React.FunctionComponent = () => {
     };
 
     if (!editMode) {
-      dispatch(addCreature(creature));
+      dispatch(addCreature({ creature, quantity }));
     } else {
       dispatch(editCreature({ index: editIndex, creature }));
     }
@@ -85,7 +88,7 @@ const QuickAddModal: React.FunctionComponent = () => {
             </Col>
             <Col>
               <Form.Group className="mv-3" controlId="exampleForm.ControlTextArea1">
-                <Form.Label>Max HP(Optional)</Form.Label>
+                <Form.Label>Max HP</Form.Label>
                 <Form.Control
                   value={maxHp}
                   onChange={(e) => {
@@ -97,7 +100,7 @@ const QuickAddModal: React.FunctionComponent = () => {
             </Col>
             <Col>
               <Form.Group className="mv-3" controlId="exampleForm.ControlTextArea1">
-                <Form.Label>Initiative(Optional)</Form.Label>
+                <Form.Label>Initiative</Form.Label>
                 <Form.Control
                   value={initiative}
                   onChange={(e) => {
@@ -107,6 +110,21 @@ const QuickAddModal: React.FunctionComponent = () => {
                 ></Form.Control>
               </Form.Group>
             </Col>
+            {!editMode && (
+              <Col>
+                <Form.Group className="mv-3" controlId="exampleForm.ControlTextArea1">
+                  <Form.Label>Quantity</Form.Label>
+                  <Form.Control
+                    value={quantity}
+                    onChange={(e) => {
+                      dispatch(changeQuantity(Number(e.target.value)));
+                    }}
+                    type="text"
+                  ></Form.Control>
+                </Form.Group>
+              </Col>
+            )}
+
             <Col>
               <Form.Group className="mv-3" controlId="exampleForm.ControlTextArea1">
                 <Form.Label>Creature Type</Form.Label>

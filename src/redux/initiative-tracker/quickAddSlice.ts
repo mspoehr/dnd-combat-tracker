@@ -9,6 +9,7 @@ const initialState = {
   maxHp: 0,
   initiative: 0,
   type: "monster" as CreatureType,
+  quantity: 0,
   modalOpen: false,
   editingMode: false,
   editIndex: 0
@@ -42,6 +43,12 @@ export const quickAddSlice = createSlice({
     changeType: (state, action: PayloadAction<CreatureType>) => {
       state.type = action.payload;
     },
+    changeQuantity: (state, action: PayloadAction<number>) => {
+      if (isNaN(action.payload)) {
+        return;
+      }
+      state.quantity = action.payload;
+    },
     open: (state) => {
       state.modalOpen = true;
     },
@@ -59,7 +66,7 @@ export const quickAddSlice = createSlice({
   }
 });
 
-export const { changeName, changeAc, changeMaxHp, changeInitiative, open, close, edit, changeType } =
+export const { changeName, changeAc, changeMaxHp, changeInitiative, changeQuantity, open, close, edit, changeType } =
   quickAddSlice.actions;
 export const selectName = (state: RootState): string => state.quickAdd.name;
 export const selectAc = (state: RootState): number => state.quickAdd.ac;
@@ -69,5 +76,6 @@ export const selectOpen = (state: RootState): boolean => state.quickAdd.modalOpe
 export const selectEditingMode = (state: RootState): boolean => state.quickAdd.editingMode;
 export const selectEditIndex = (state: RootState): number => state.quickAdd.editIndex;
 export const selectType = (state: RootState): CreatureType => state.quickAdd.type;
+export const selectQuantity = (state: RootState): number => state.quickAdd.quantity;
 
 export default quickAddSlice.reducer;
