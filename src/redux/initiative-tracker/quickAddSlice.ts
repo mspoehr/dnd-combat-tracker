@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { CreatureType } from "../models";
 import { RootState } from "../store";
 import { InitiativeCreature } from "./initiativeTrackerSlice";
 
@@ -7,6 +8,7 @@ const initialState = {
   ac: 0,
   maxHp: 0,
   initiative: 0,
+  type: "monster" as CreatureType,
   modalOpen: false,
   editingMode: false,
   editIndex: 0
@@ -37,6 +39,9 @@ export const quickAddSlice = createSlice({
       }
       state.initiative = action.payload;
     },
+    changeType: (state, action: PayloadAction<CreatureType>) => {
+      state.type = action.payload;
+    },
     open: (state) => {
       state.modalOpen = true;
     },
@@ -49,11 +54,13 @@ export const quickAddSlice = createSlice({
       state.initiative = action.payload.creature.initiative ?? 0;
       state.modalOpen = true;
       state.editIndex = action.payload.index;
+      state.type = action.payload.creature.type ?? "monster";
     }
   }
 });
 
-export const { changeName, changeAc, changeMaxHp, changeInitiative, open, close, edit } = quickAddSlice.actions;
+export const { changeName, changeAc, changeMaxHp, changeInitiative, open, close, edit, changeType } =
+  quickAddSlice.actions;
 export const selectName = (state: RootState): string => state.quickAdd.name;
 export const selectAc = (state: RootState): number => state.quickAdd.ac;
 export const selectMaxHp = (state: RootState): number => state.quickAdd.maxHp;
@@ -61,5 +68,6 @@ export const selectInitiative = (state: RootState): number => state.quickAdd.ini
 export const selectOpen = (state: RootState): boolean => state.quickAdd.modalOpen;
 export const selectEditingMode = (state: RootState): boolean => state.quickAdd.editingMode;
 export const selectEditIndex = (state: RootState): number => state.quickAdd.editIndex;
+export const selectType = (state: RootState): CreatureType => state.quickAdd.type;
 
 export default quickAddSlice.reducer;
