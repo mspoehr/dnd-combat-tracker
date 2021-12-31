@@ -1,7 +1,6 @@
 import React from "react";
 import { Button, ButtonGroup, Col, Form, Modal, Row, ToggleButton } from "react-bootstrap";
-import { addCreature, InitiativeCreature, editCreature } from "../../redux/initiative-tracker/initiativeTrackerSlice";
-import { CreatureType } from "../../redux/models";
+import { addCreature, editCreature } from "../../redux/initiative-tracker/initiativeTrackerSlice";
 import {
   changeName,
   changeAc,
@@ -18,6 +17,7 @@ import {
   selectType,
   changeType
 } from "../../redux/initiative-tracker/quickAddSlice";
+import { CreatureType } from "../../redux/models";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 
 const QuickAddModal: React.FunctionComponent = () => {
@@ -34,7 +34,7 @@ const QuickAddModal: React.FunctionComponent = () => {
     { name: "Monster", value: "monster" }
   ];
   const save = () => {
-    const creature: InitiativeCreature = {
+    const creature = {
       name,
       ac,
       maxHp,

@@ -1,7 +1,9 @@
 .initiative-creature {
+  /* Note that applying margin in here seems to result in weird issues with the dragging:
+  https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/api/draggable.md#unsupported-margin-setups
+  */
   display: flex;
   align-items: stretch;
-  margin: 1rem;
   max-width: 450px;
   border: 1px solid gray;
 }

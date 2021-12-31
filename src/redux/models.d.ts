@@ -15,6 +15,7 @@ export interface Creature extends UniqueEntity {
   name: string;
   maxHp: number;
   ac: number;
-  speed: Speed;
+  // TODO: use this later.
+  // speed: Speed;
   type: CreatureType;
 }
