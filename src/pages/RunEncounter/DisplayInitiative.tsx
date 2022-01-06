@@ -88,7 +88,7 @@ const DisplayInitiative: React.FunctionComponent = () => {
 
   return (
     <div>
-      <Stack direction="horizontal" gap={2}>
+      <Stack className="my-2" direction="horizontal" gap={2}>
         <Button onClick={() => dispatch(open())}>Quick Add Creature</Button>
         <Button onClick={() => dispatch(rollAllInitiative())}>Roll Initiative</Button>
       </Stack>
