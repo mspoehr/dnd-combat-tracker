@@ -2,13 +2,14 @@ import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Creature } from "../models";
 import { RootState } from "../store";
 import { v4 as uuidv4 } from "uuid";
+import { QuickAddCreature } from "./quickAddSlice";
 
 export interface InitiativeCreature extends Creature {
   initiative: number;
   order: number;
   currentHp: number;
 }
-type InitiativeCreatureExternal = Omit<InitiativeCreature, "uuid" | "order">;
+export type InitiativeCreatureExternal = Omit<InitiativeCreature, "uuid" | "order">;
 
 const initialState = {
   creatures: [] as InitiativeCreature[],
@@ -53,13 +54,15 @@ export const initiativeTrackerSlice = createSlice({
   name: "initiativeTracker",
   initialState,
   reducers: {
-    addCreature: (state, action: PayloadAction<{ creature: InitiativeCreatureExternal; quantity: number }>) => {
+    addCreatures: (state, action: PayloadAction<InitiativeCreatureExternal[]>) => {
       const currentTurnUuid = state.creatures[state.currentTurn]?.uuid;
 
-      const creature: InitiativeCreature = { order: 0, uuid: uuidv4(), ...action.payload.creature };
-      for (let i = 0; i < action.payload.quantity; i++) {
-        state.creatures.push(creature);
-      }
+      const creatures: InitiativeCreature[] = action.payload.map((creature, index) => ({
+        order: index,
+        uuid: uuidv4(),
+        ...creature
+      }));
+      state.creatures.push(...creatures);
       sortInitiativeCreatures(state.creatures);
 
       // If combat has started, preserve the turn of the creature whose turn it currently is
@@ -81,7 +84,7 @@ export const initiativeTrackerSlice = createSlice({
         }
       }
     },
-    editCreature: (state, action: PayloadAction<{ index: number; creature: InitiativeCreatureExternal }>) => {
+    editCreature: (state, action: PayloadAction<{ index: number; creature: QuickAddCreature }>) => {
       const index = adjustedCreatureIndex(state, action.payload.index);
       state.creatures[index] = {
         ...state.creatures[index],
@@ -150,7 +153,7 @@ export const initiativeTrackerSlice = createSlice({
 });
 
 export const {
-  addCreature,
+  addCreatures,
   deleteCreature,
   editCreature,
   changeInitiative,
