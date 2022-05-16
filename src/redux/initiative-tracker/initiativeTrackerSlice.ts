@@ -114,7 +114,7 @@ export const initiativeTrackerSlice = createSlice({
     },
     changeInitiative: (state, action: PayloadAction<{ index: number; newInitiative: string }>) => {
       const newInitiative = action.payload.newInitiative;
-      if (isNaN(Number(newInitiative)) && newInitiative !== "") {
+      if (!isFinite(Number(newInitiative)) && newInitiative !== "") {
         return;
       }
 

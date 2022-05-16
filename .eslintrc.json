@@ -13,7 +13,9 @@
   ],
   "rules": {
     "react-hooks/rules-of-hooks": "error",
-    "react/prop-types": "off",
+    "react/prop-types": "off", // unneeded, we're using typescript
+    "react/jsx-uses-react": "off", // not needed in React 17+
+    "react/react-in-jsx-scope": "off", // not needed in React 17+
     "eqeqeq": "error",
     "arrow-body-style": "warn",
     "prettier/prettier": [
