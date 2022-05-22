@@ -28,6 +28,10 @@ jobs:
     needs: build
     if: github.ref == 'refs/heads/main'
     steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: build
+          path: build
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@4.1.7
         with:
