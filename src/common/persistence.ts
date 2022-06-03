@@ -1,4 +1,4 @@
-import { RootState, store } from "./store";
+import { RootState, store } from "../app/store";
 
 export const saveState = (): void => {
   try {

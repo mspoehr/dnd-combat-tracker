@@ -1,10 +1,10 @@
 import { CombinedState, combineReducers, configureStore, Reducer } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import encountersSlice from "./data/encountersSlice";
-import monstersSlice from "./data/monstersSlice";
-import initiativeTrackerSlice from "./initiative-tracker/initiativeTrackerSlice";
-import quickAddSlice from "./initiative-tracker/quickAddSlice";
-import { loadState, saveState } from "./persistence";
+import { loadState, saveState } from "../common/persistence";
+import initiativeTrackerSlice from "../features/combat/initiativeTrackerSlice";
+import quickAddSlice from "../features/combat/quickAddSlice";
+import encountersSlice from "../features/encounters/encountersSlice";
+import monstersSlice from "../features/monsters/monstersSlice";
 
 const rootReducer = combineReducers({
   encounters: encountersSlice,

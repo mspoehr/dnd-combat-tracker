@@ -1,7 +1,7 @@
 import { createEntityAdapter, createSlice } from "@reduxjs/toolkit";
-import { RootState } from "../store";
+import { RootState } from "../../app/store";
 import naturalCompare from "string-natural-compare";
-import { UniqueEntity, UniqueIdType } from "../models";
+import { UniqueEntity, UniqueIdType } from "../../common/models";
 
 export interface EncounterCreature {
   creatureUuid: UniqueIdType;

@@ -16,9 +16,9 @@ import reducer, {
   selectInitiativeRound,
   selectSortedInitiativeCreatures
 } from "./initiativeTrackerSlice";
-import { CreatureType } from "../models";
+import { CreatureType } from "../../common/models";
 import { QuickAddCreature } from "./quickAddSlice";
-import { RootState } from "../store";
+import { RootState } from "../../app/store";
 
 const externalCreature = (attributes?: Partial<InitiativeCreatureExternal>): InitiativeCreatureExternal => ({
   initiative: Math.floor(Math.random() * 20) + 1,

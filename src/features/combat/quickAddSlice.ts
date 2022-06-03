@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { CreatureType } from "../models";
-import { RootState } from "../store";
+import { RootState } from "../../app/store";
+import { CreatureType } from "../../common/models";
 import { InitiativeCreature } from "./initiativeTrackerSlice";
 
 const initialState = {

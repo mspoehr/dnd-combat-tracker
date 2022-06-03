@@ -2,8 +2,8 @@ import React from "react";
 
 import { Alert, Button, Col, Container, Row, Stack } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { selectAllEncounters } from "../redux/data/encountersSlice";
-import { useAppSelector } from "../redux/store";
+import { useAppSelector } from "../../app/store";
+import { selectAllEncounters } from "./encountersSlice";
 
 function EmptyPlaceholder() {
   return <Alert variant="info">There are no encounters yet. Create one now!</Alert>;

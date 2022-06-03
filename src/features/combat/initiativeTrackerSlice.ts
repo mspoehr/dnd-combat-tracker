@@ -1,6 +1,6 @@
 import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Creature } from "../models";
-import { RootState } from "../store";
+import { Creature } from "../../common/models";
+import { RootState } from "../../app/store";
 import { v4 as uuidv4 } from "uuid";
 import { QuickAddCreature } from "./quickAddSlice";
 
