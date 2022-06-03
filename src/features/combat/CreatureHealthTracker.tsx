@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { Button, Form, Overlay, Popover, Stack } from "react-bootstrap";
-import { InitiativeCreature, adjustCreatureHealth } from "../../redux/initiative-tracker/initiativeTrackerSlice";
-import { useAppDispatch } from "../../redux/store";
+import { useAppDispatch } from "../../app/store";
+import { InitiativeCreature, adjustCreatureHealth } from "./initiativeTrackerSlice";
 
 interface Props {
   creature: InitiativeCreature;

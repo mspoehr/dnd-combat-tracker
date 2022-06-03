@@ -1,23 +1,23 @@
 import React, { useState } from "react";
 import { Button, ButtonGroup, Col, Form, InputGroup, Modal, Row, ToggleButton } from "react-bootstrap";
-import { addCreatures, editCreature } from "../../redux/initiative-tracker/initiativeTrackerSlice";
+import { useAppDispatch, useAppSelector } from "../../app/store";
+import { CreatureType } from "../../common/models";
+import { addCreatures, editCreature } from "./initiativeTrackerSlice";
 import {
+  QuickAddCreature,
   changeName,
   changeAc,
   changeMaxHp,
   changeInitiative,
-  close,
-  changeType,
   changeQuantity,
+  changeType,
   selectCreatures,
-  QuickAddCreature,
+  selectEditIndex,
   selectEditMode,
   selectModalOpen,
-  selectEditIndex,
+  close,
   addRow
-} from "../../redux/initiative-tracker/quickAddSlice";
-import { CreatureType } from "../../redux/models";
-import { useAppDispatch, useAppSelector } from "../../redux/store";
+} from "./quickAddSlice";
 
 function AddNewCreature(props: {
   currentCreature: QuickAddCreature;

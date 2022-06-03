@@ -2,8 +2,8 @@ import React from "react";
 import { Button, Form, Stack } from "react-bootstrap";
 
 import QuickAddModal from "./QuickAddModal";
-import { open, edit } from "../../redux/initiative-tracker/quickAddSlice";
-import { useAppDispatch, useAppSelector } from "../../redux/store";
+import { open, edit } from "./quickAddSlice";
+import { useAppDispatch, useAppSelector } from "../../app/store";
 import {
   changeInitiative,
   deleteCreature,
@@ -11,7 +11,7 @@ import {
   selectSortedInitiativeCreatures,
   rollAllInitiative,
   reorderCreature
-} from "../../redux/initiative-tracker/initiativeTrackerSlice";
+} from "./initiativeTrackerSlice";
 
 import "./DisplayInitiative.css";
 import CreatureHealthTracker from "./CreatureHealthTracker";

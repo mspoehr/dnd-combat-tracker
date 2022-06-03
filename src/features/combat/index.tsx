@@ -8,8 +8,8 @@ import {
   selectInitiativeTurn,
   restartEncounter,
   clearEncounter
-} from "../../redux/initiative-tracker/initiativeTrackerSlice";
-import { useAppDispatch, useAppSelector } from "../../redux/store";
+} from "./initiativeTrackerSlice";
+import { useAppDispatch, useAppSelector } from "../../app/store";
 
 function Counter(props: { text: string; value: number }) {
   return (

@@ -1,6 +1,6 @@
 import { createEntityAdapter, createSlice } from "@reduxjs/toolkit";
 import naturalCompare from "string-natural-compare";
-import { Creature } from "../models";
+import { Creature } from "../../common/models";
 
 export interface Monster extends Creature {
   type: "monster";
