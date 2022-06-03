@@ -4,9 +4,13 @@ repos:
     hooks:
       - id: check-merge-conflict
       - id: check-yaml
-      - id: check-json
       - id: end-of-file-fixer
       - id: trailing-whitespace
+  - repo: https://gitlab.com/bmares/check-json5
+    rev: v1.0.0
+    hooks:
+      - id: check-json5
+        name: Check JSON
   - repo: https://github.com/pre-commit/mirrors-csslint
     rev: v1.0.5
     hooks:
@@ -15,3 +19,4 @@ repos:
     rev: "v8.4.1"
     hooks:
       - id: eslint
+        files: \.[jt]sx?$ # *.js, *.jsx, *.ts and *.tsx
