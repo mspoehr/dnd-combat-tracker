@@ -1,11 +1,10 @@
 import React, { useRef, useState } from "react";
 import { Button, Form, Overlay, Popover, Stack } from "react-bootstrap";
-import { useAppDispatch } from "../../app/store";
-import { InitiativeCreature, adjustCreatureHealth } from "./initiativeTrackerSlice";
+import { useAppDispatch, useAppSelector } from "../../app/store";
+import { adjustCreatureHealth, selectCreatureCurrentHp, selectCreatureMaxHp } from "./initiativeTrackerSlice";
 
 interface Props {
-  creature: InitiativeCreature;
-  index: number;
+  uuid: string;
 }
 
 const CreatureHealthTracker: React.FunctionComponent<Props> = (props) => {
@@ -14,6 +13,9 @@ const CreatureHealthTracker: React.FunctionComponent<Props> = (props) => {
   const [hpAdjustment, _setHpAdjustment] = useState("0");
 
   const dispatch = useAppDispatch();
+
+  const currentHp = useAppSelector(selectCreatureCurrentHp(props.uuid));
+  const maxHp = useAppSelector(selectCreatureMaxHp(props.uuid));
 
   const setHpAdjustment = (value: string) => {
     if (isNaN(Number(value)) && value !== "") {
@@ -29,12 +31,12 @@ const CreatureHealthTracker: React.FunctionComponent<Props> = (props) => {
   };
 
   const heal = () => {
-    dispatch(adjustCreatureHealth({ index: props.index, amount: Number(hpAdjustment) }));
+    dispatch(adjustCreatureHealth({ uuid: props.uuid, amount: Number(hpAdjustment) }));
     close();
   };
 
   const damage = () => {
-    dispatch(adjustCreatureHealth({ index: props.index, amount: -Number(hpAdjustment) }));
+    dispatch(adjustCreatureHealth({ uuid: props.uuid, amount: -Number(hpAdjustment) }));
     close();
   };
 
@@ -43,9 +45,9 @@ const CreatureHealthTracker: React.FunctionComponent<Props> = (props) => {
       <div ref={target} onClick={() => setShowHealth(true)} style={{ minWidth: "110px" }}>
         <div>HP</div>
         <div className="flex-row align-items-center">
-          <div className="bg-white p-2 rounded d-inline-block">{props.creature.currentHp}</div>
+          <div className="bg-white p-2 rounded d-inline-block">{currentHp}</div>
           <span className="mx-2">/</span>
-          <span>{props.creature.maxHp}</span>
+          <span>{maxHp}</span>
         </div>
       </div>
       <Overlay rootClose={true} target={target.current} show={showHealth} placement="right" onHide={close}>

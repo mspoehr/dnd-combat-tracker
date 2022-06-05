@@ -10,17 +10,19 @@ import reducer, {
   restartEncounter,
   clearEncounter,
   InitiativeCreature,
-  InitiativeCreatureExternal,
   selectInitiativeTurn,
-  selectInitiativeCreatures,
   selectInitiativeRound,
-  selectSortedInitiativeCreatures
+  selectSortedCreatureUuids,
+  selectCreatureByUuid,
+  selectCreatureCurrentHp
 } from "./initiativeTrackerSlice";
 import { CreatureType } from "../../common/models";
-import { QuickAddCreature } from "./quickAddSlice";
 import { RootState } from "../../app/store";
+import { v4 as uuidv4 } from "uuid";
+import _ from "lodash";
 
-const externalCreature = (attributes?: Partial<InitiativeCreatureExternal>): InitiativeCreatureExternal => ({
+const createCreature = (attributes?: Partial<InitiativeCreature>): InitiativeCreature => ({
+  uuid: uuidv4(),
   initiative: Math.floor(Math.random() * 20) + 1,
   currentHp: 30,
   name: "A monster",
@@ -30,47 +32,32 @@ const externalCreature = (attributes?: Partial<InitiativeCreatureExternal>): Ini
   ...attributes
 });
 
-const internalCreature = (creature: InitiativeCreatureExternal, attributes?: Partial<InitiativeCreature>) => ({
-  ...creature,
-  uuid: expect.any(String),
-  order: 0,
-  ...attributes
-});
-
-const createCreature = (
-  attributes?: Partial<InitiativeCreatureExternal>,
-  internalAttributes?: Partial<InitiativeCreature>
-) => {
-  const creature = externalCreature(attributes);
-
-  return [creature, internalCreature(creature, internalAttributes)] as [InitiativeCreatureExternal, InitiativeCreature];
-};
-
 const sliceState = (creatures: InitiativeCreature[], currentTurn: number, round: number) => ({
-  creatures,
+  creatures: _.fromPairs(creatures.map((creature) => [creature.uuid, creature])),
+  sortedCreatureUuids: creatures.map((creature) => creature.uuid),
   currentTurn,
   round
 });
 
-const [creature1, creature1Internal] = createCreature({ initiative: 20 });
-const [creature2, creature2Internal] = createCreature({ initiative: 10 });
+const creature1 = createCreature({ initiative: 20 });
+const creature2 = createCreature({ initiative: 10 });
 
 const emptyTurnOrder = sliceState([], 0, 0);
-const oneCreatureAdded = sliceState([creature1Internal], 0, 0);
-const twoCreaturesAdded = sliceState([creature1Internal, creature2Internal], 0, 0);
+const oneCreatureAdded = sliceState([creature1], 0, 0);
+const twoCreaturesAdded = sliceState([creature1, creature2], 0, 0);
 
 describe("addCreature", () => {
   const nextState = (
     state: ReturnType<typeof sliceState>,
-    creatures: InitiativeCreatureExternal[]
+    creatures: InitiativeCreature[]
   ): ReturnType<typeof sliceState> => reducer(state, addCreatures(creatures));
 
   it("can add a creature when none exist", () => {
-    expect(nextState(emptyTurnOrder, [creature1])).toEqual(sliceState([creature1Internal], 0, 0));
+    expect(nextState(emptyTurnOrder, [creature1])).toEqual(sliceState([creature1], 0, 0));
   });
 
   it("can add a creature when one already exists", () => {
-    expect(nextState(sliceState([creature1Internal], 0, 0), [creature2])).toEqual(twoCreaturesAdded);
+    expect(nextState(sliceState([creature1], 0, 0), [creature2])).toEqual(twoCreaturesAdded);
   });
 
   it("can add multiple creatures at once", () => {
@@ -78,50 +65,50 @@ describe("addCreature", () => {
   });
 
   it("inserts creatures in sorted order", () => {
-    const [creature3, creature3Internal] = createCreature({ initiative: 25 });
-    const [creature4, creature4Internal] = createCreature({ initiative: 15 });
-    const [creature5, creature5Internal] = createCreature({ initiative: 5 });
+    const creature3 = createCreature({ initiative: 25 });
+    const creature4 = createCreature({ initiative: 15 });
+    const creature5 = createCreature({ initiative: 5 });
 
     expect(nextState(twoCreaturesAdded, [creature3, creature4, creature5])).toEqual(
-      sliceState([creature3Internal, creature1Internal, creature4Internal, creature2Internal, creature5Internal], 0, 0)
+      sliceState([creature3, creature1, creature4, creature2, creature5], 0, 0)
     );
   });
 
-  it("increments order for creatures with the same initiative", () => {
-    const [creature1, creature1Internal] = createCreature({ initiative: 20 }, { order: 0 });
-    const [creature2, creature2Internal] = createCreature({ initiative: 20 }, { order: 1 });
+  it("inserts creatures with the same initiative in given order", () => {
+    const newCreature1 = createCreature({ initiative: 21 });
+    const newCreature2 = createCreature({ initiative: 21 });
 
-    expect(nextState(emptyTurnOrder, [creature1, creature2])).toEqual(
-      sliceState([creature1Internal, creature2Internal], 0, 0)
+    expect(nextState(oneCreatureAdded, [newCreature1, newCreature2])).toEqual(
+      sliceState([newCreature1, newCreature2, creature1], 0, 0)
     );
   });
 
   describe("preserving current creature's turn", () => {
-    const existingCreature1 = internalCreature(externalCreature({ initiative: 17 }));
-    const existingCreature2 = internalCreature(externalCreature({ initiative: 15 }));
-    const newCreature = externalCreature({ initiative: 16 });
+    const existingCreature1 = createCreature({ initiative: 17 });
+    const existingCreature2 = createCreature({ initiative: 15 });
+    const newCreature = createCreature({ initiative: 16 });
 
     it("preserves the turn of the current creature", () => {
       const originalState = sliceState([existingCreature1, existingCreature2], 1, 1);
-      const expectedState = sliceState([existingCreature1, internalCreature(newCreature), existingCreature2], 2, 1);
+      const expectedState = sliceState([existingCreature1, newCreature, existingCreature2], 2, 1);
 
       expect(nextState(originalState, [newCreature])).toEqual(expectedState);
     });
 
     it("preserves the current turn if it is the top of a round", () => {
-      const newCreature = externalCreature({ initiative: 18 });
+      const newCreature = createCreature({ initiative: 18 });
 
       const originalState = sliceState([existingCreature1, existingCreature2], 0, 1);
-      const expectedState = sliceState([internalCreature(newCreature), existingCreature1, existingCreature2], 1, 1);
+      const expectedState = sliceState([newCreature, existingCreature1, existingCreature2], 1, 1);
 
       expect(nextState(originalState, [newCreature])).toEqual(expectedState);
     });
 
     it("does not preserve the turn order if combat has not started", () => {
-      const newCreature = externalCreature({ initiative: 18 });
+      const newCreature = createCreature({ initiative: 18 });
 
       const originalState = sliceState([existingCreature1, existingCreature2], 0, 0);
-      const expectedState = sliceState([internalCreature(newCreature), existingCreature1, existingCreature2], 0, 0);
+      const expectedState = sliceState([newCreature, existingCreature1, existingCreature2], 0, 0);
 
       expect(nextState(originalState, [newCreature])).toEqual(expectedState);
     });
@@ -129,47 +116,47 @@ describe("addCreature", () => {
 });
 
 describe("deleteCreature", () => {
-  const nextState = (state: ReturnType<typeof sliceState>, index: number): ReturnType<typeof sliceState> =>
-    reducer(state, deleteCreature(index));
+  const nextState = (state: ReturnType<typeof sliceState>, uuid: string): ReturnType<typeof sliceState> =>
+    reducer(state, deleteCreature(uuid));
 
   it("removes a creature from the initiative order", () => {
-    expect(nextState(twoCreaturesAdded, 1)).toEqual(oneCreatureAdded);
+    expect(nextState(twoCreaturesAdded, creature2.uuid)).toEqual(oneCreatureAdded);
   });
 
   it("removes a creature that is not last from the initiative order", () => {
-    const expectedState = sliceState([creature2Internal], 0, 0);
+    const expectedState = sliceState([creature2], 0, 0);
 
-    expect(nextState(twoCreaturesAdded, 0)).toEqual(expectedState);
+    expect(nextState(twoCreaturesAdded, creature1.uuid)).toEqual(expectedState);
   });
 
   it("removes the last creature from the initiative order", () => {
-    expect(nextState(oneCreatureAdded, 0)).toEqual(emptyTurnOrder);
+    expect(nextState(oneCreatureAdded, creature1.uuid)).toEqual(emptyTurnOrder);
   });
 
   describe("preserving current creature's turn", () => {
-    const creature3Internal = internalCreature(externalCreature({ initiative: 9 }));
+    const creature3 = createCreature({ initiative: 9 });
 
     it("preserves the turn of the current creature", () => {
       // It's currently creature 2's turn.
-      const originalState = sliceState([creature1Internal, creature2Internal, creature3Internal], 1, 1);
-      const expectedState = sliceState([creature2Internal, creature3Internal], 0, 1);
+      const originalState = sliceState([creature1, creature2, creature3], 1, 1);
+      const expectedState = sliceState([creature2, creature3], 0, 1);
 
-      expect(nextState(originalState, 2)).toEqual(expectedState); // remove creature 1 (index of 2 since it just went)
+      expect(nextState(originalState, creature1.uuid)).toEqual(expectedState);
     });
 
     it("leaves the current turn alone if it is the top of a round", () => {
-      const originalState = sliceState([creature1Internal, creature2Internal, creature3Internal], 0, 1);
-      const expectedState = sliceState([creature2Internal, creature3Internal], 0, 1);
+      const originalState = sliceState([creature1, creature2, creature3], 0, 1);
+      const expectedState = sliceState([creature2, creature3], 0, 1);
 
-      expect(nextState(originalState, 0)).toEqual(expectedState);
+      expect(nextState(originalState, creature1.uuid)).toEqual(expectedState);
     });
 
     it("handles deleting the creature whose turn it is gracefully", () => {
       // It's currently creature 2's turn.
-      const originalState = sliceState([creature1Internal, creature2Internal, creature3Internal], 1, 1);
-      const expectedState = sliceState([creature1Internal, creature3Internal], 1, 1);
+      const originalState = sliceState([creature1, creature2, creature3], 1, 1);
+      const expectedState = sliceState([creature1, creature3], 1, 1);
 
-      expect(nextState(originalState, 0)).toEqual(expectedState); // remove creature 1 (index of 2 since it just went)
+      expect(nextState(originalState, creature2.uuid)).toEqual(expectedState);
     });
   });
 });
@@ -177,9 +164,9 @@ describe("deleteCreature", () => {
 describe("editCreature", () => {
   const nextState = (
     state: ReturnType<typeof sliceState>,
-    index: number,
-    creature: QuickAddCreature
-  ): ReturnType<typeof sliceState> => reducer(Object.assign({}, state), editCreature({ index, creature }));
+    uuid: string,
+    creature: Partial<InitiativeCreature>
+  ): ReturnType<typeof sliceState> => reducer(Object.assign({}, state), editCreature({ ...creature, uuid }));
 
   const updates = {
     name: "a new name",
@@ -191,30 +178,30 @@ describe("editCreature", () => {
   };
 
   it("updates the creature's attributes", () => {
-    const expectedState = sliceState([{ ...creature1Internal, ...updates }], 0, 0);
+    const expectedState = sliceState([{ ...creature1, ...updates }], 0, 0);
 
-    expect(nextState(oneCreatureAdded, 0, updates)).toEqual(expectedState);
+    expect(nextState(oneCreatureAdded, creature1.uuid, updates)).toEqual(expectedState);
   });
 
   it("updates a creature's attributes after they went in combat", () => {
     // It's currently creature 2's turn
-    const originalState = sliceState([creature1Internal, creature2Internal], 1, 1);
-    const expectedState = sliceState([{ ...creature1Internal, ...updates }, creature2Internal], 1, 1);
+    const originalState = sliceState([creature1, creature2], 1, 1);
+    const expectedState = sliceState([{ ...creature1, ...updates }, creature2], 1, 1);
 
-    expect(nextState(originalState, 1, updates)).toEqual(expectedState); // update creature 1
+    expect(nextState(originalState, creature1.uuid, updates)).toEqual(expectedState); // update creature 1
   });
 
   it("sorts the initiative order again", () => {
-    const expectedState = sliceState([{ ...creature2Internal, ...updates }, creature1Internal], 0, 0);
+    const expectedState = sliceState([{ ...creature2, ...updates }, creature1], 0, 0);
 
-    expect(nextState(twoCreaturesAdded, 1, updates)).toEqual(expectedState);
+    expect(nextState(twoCreaturesAdded, creature2.uuid, updates)).toEqual(expectedState);
   });
 
-  it("fixes creatures who have duplicate initiatives", () => {
+  it("does not reorder creatures with duplicate initiatives", () => {
     const thisUpdates = { ...updates, initiative: creature1.initiative };
-    const expectedState = sliceState([creature1Internal, { ...creature2Internal, ...thisUpdates, order: 1 }], 0, 0);
+    const expectedState = sliceState([creature1, { ...creature2, ...thisUpdates }], 0, 0);
 
-    expect(nextState(twoCreaturesAdded, 1, thisUpdates)).toEqual(expectedState);
+    expect(nextState(twoCreaturesAdded, creature2.uuid, thisUpdates)).toEqual(expectedState);
   });
 });
 
@@ -222,15 +209,15 @@ describe("previous", () => {
   const nextState = (state: ReturnType<typeof sliceState>): ReturnType<typeof sliceState> => reducer(state, previous());
 
   it("decrements the current turn", () => {
-    const middleOfCombat = sliceState([creature1Internal, creature2Internal], 2, 2);
-    const expectedState = sliceState([creature1Internal, creature2Internal], 1, 2);
+    const middleOfCombat = sliceState([creature1, creature2], 2, 2);
+    const expectedState = sliceState([creature1, creature2], 1, 2);
 
     expect(nextState(middleOfCombat)).toEqual(expectedState);
   });
 
   it("returns to the end of the previous round if it is the first creature's turn", () => {
-    const topOfSecondRound = sliceState([creature1Internal, creature2Internal], 0, 1);
-    const expectedState = sliceState([creature1Internal, creature2Internal], 1, 0);
+    const topOfSecondRound = sliceState([creature1, creature2], 0, 1);
+    const expectedState = sliceState([creature1, creature2], 1, 0);
 
     expect(nextState(topOfSecondRound)).toEqual(expectedState);
   });
@@ -244,14 +231,14 @@ describe("next", () => {
   const nextState = (state: ReturnType<typeof sliceState>): ReturnType<typeof sliceState> => reducer(state, next());
 
   it("increments the current turn", () => {
-    const expectedState = sliceState([creature1Internal, creature2Internal], 1, 0);
+    const expectedState = sliceState([creature1, creature2], 1, 0);
 
     expect(nextState(twoCreaturesAdded)).toEqual(expectedState);
   });
 
   it("goes back to the top of the order for the next round", () => {
-    const endOfFirstRound = sliceState([creature1Internal, creature2Internal], 1, 0);
-    const expectedState = sliceState([creature1Internal, creature2Internal], 0, 1);
+    const endOfFirstRound = sliceState([creature1, creature2], 1, 0);
+    const expectedState = sliceState([creature1, creature2], 0, 1);
 
     expect(nextState(endOfFirstRound)).toEqual(expectedState);
   });
@@ -260,62 +247,56 @@ describe("next", () => {
 describe("changeInitiative", () => {
   const nextState = (
     state: ReturnType<typeof sliceState>,
-    index: number,
+    uuid: string,
     newInitiative: number | string
-  ): ReturnType<typeof sliceState> => reducer(state, changeInitiative({ index, newInitiative: String(newInitiative) }));
+  ): ReturnType<typeof sliceState> => reducer(state, changeInitiative({ uuid, newInitiative: String(newInitiative) }));
 
   it("assigns the new initiative to the requested creature", () => {
-    const expectedState = sliceState(
-      [{ ...creature1Internal, initiative: creature1Internal.initiative + 1 }, creature2Internal],
-      0,
-      0
-    );
+    const expectedState = sliceState([{ ...creature1, initiative: creature1.initiative + 1 }, creature2], 0, 0);
 
-    expect(nextState(twoCreaturesAdded, 0, creature1.initiative + 1)).toEqual(expectedState);
+    expect(nextState(twoCreaturesAdded, creature1.uuid, creature1.initiative + 1)).toEqual(expectedState);
   });
 
   it("does nothing if new initiative is invalid", () => {
     const invalidValues = [NaN, Infinity, "invalid"];
-    invalidValues.forEach((value) => expect(nextState(twoCreaturesAdded, 0, value)).toEqual(twoCreaturesAdded));
+    invalidValues.forEach((value) =>
+      expect(nextState(twoCreaturesAdded, creature1.uuid, value)).toEqual(twoCreaturesAdded)
+    );
   });
 
   it("assumes that an empty string means 0", () => {
-    const expectedState = sliceState([creature2Internal, { ...creature1Internal, initiative: 0 }], 0, 0);
+    const expectedState = sliceState([creature2, { ...creature1, initiative: 0 }], 0, 0);
 
-    expect(nextState(twoCreaturesAdded, 0, "")).toEqual(expectedState);
+    expect(nextState(twoCreaturesAdded, creature1.uuid, "")).toEqual(expectedState);
   });
 
   it("updates a creature's initiative after they went in combat", () => {
     // It's currently creature 2's turn
-    const originalState = sliceState([creature1Internal, creature2Internal], 1, 1);
-    const expectedState = sliceState(
-      [{ ...creature1Internal, initiative: creature1Internal.initiative + 5 }, creature2Internal],
-      1,
-      1
-    );
+    const originalState = sliceState([creature1, creature2], 1, 1);
+    const expectedState = sliceState([{ ...creature1, initiative: creature1.initiative + 5 }, creature2], 1, 1);
 
     // update creature 1
-    expect(nextState(originalState, 1, creature1Internal.initiative + 5)).toEqual(expectedState);
+    expect(nextState(originalState, creature1.uuid, creature1.initiative + 5)).toEqual(expectedState);
   });
 
   it("sorts the initiative order again", () => {
-    const expectedState = sliceState(
-      [{ ...creature2Internal, initiative: creature1Internal.initiative + 1 }, creature1Internal],
-      0,
-      0
-    );
+    const expectedState = sliceState([{ ...creature2, initiative: creature1.initiative + 1 }, creature1], 0, 0);
 
-    expect(nextState(twoCreaturesAdded, 1, creature1Internal.initiative + 1)).toEqual(expectedState);
+    expect(nextState(twoCreaturesAdded, creature2.uuid, creature1.initiative + 1)).toEqual(expectedState);
   });
 
-  it("fixes creatures who have duplicate initiatives", () => {
-    const expectedState = sliceState(
-      [creature1Internal, { ...creature2Internal, initiative: creature1Internal.initiative, order: 1 }],
-      0,
-      0
-    );
+  it("places creatures with same initiative at the end of the same count", () => {
+    const creature3 = createCreature({ initiative: 1 });
+    const state = sliceState([creature1, creature2, creature3], 0, 0);
+    const expectedState = sliceState([creature1, { ...creature3, initiative: creature1.initiative }, creature2], 0, 0);
 
-    expect(nextState(twoCreaturesAdded, 1, creature1.initiative)).toEqual(expectedState);
+    expect(nextState(state, creature3.uuid, creature1.initiative)).toEqual(expectedState);
+  });
+
+  it("does not reorder anything if it is not necessary", () => {
+    const expectedState = sliceState([creature1, { ...creature2, initiative: creature1.initiative }], 0, 0);
+
+    expect(nextState(twoCreaturesAdded, creature2.uuid, creature1.initiative)).toEqual(expectedState);
   });
 });
 
@@ -327,109 +308,192 @@ describe("rollAllInitiative", () => {
 });
 
 describe("adjustCreatureHealth", () => {
-  const [damagedCreature, damagedCreatureInternal] = createCreature({ currentHp: 15 });
+  const damagedCreature = createCreature({ currentHp: 15 });
 
   const nextState = (
     state: ReturnType<typeof sliceState>,
-    index: number,
+    uuid: string,
     amount: number
-  ): ReturnType<typeof sliceState> => reducer(state, adjustCreatureHealth({ index, amount }));
+  ): ReturnType<typeof sliceState> => reducer(state, adjustCreatureHealth({ uuid, amount }));
 
   it("heals the creature by the specified amount if it is positive", () => {
-    const currentState = sliceState([damagedCreatureInternal], 0, 0);
-    const expectedState = sliceState([{ ...damagedCreatureInternal, currentHp: damagedCreature.currentHp + 5 }], 0, 0);
+    const currentState = sliceState([damagedCreature], 0, 0);
+    const expectedState = sliceState([{ ...damagedCreature, currentHp: damagedCreature.currentHp + 5 }], 0, 0);
 
-    expect(nextState(currentState, 0, 5)).toEqual(expectedState);
+    expect(nextState(currentState, damagedCreature.uuid, 5)).toEqual(expectedState);
   });
 
   it("damages the creature by the specified amount if it is negative", () => {
-    const currentState = sliceState([damagedCreatureInternal], 0, 0);
-    const expectedState = sliceState([{ ...damagedCreatureInternal, currentHp: damagedCreature.currentHp - 5 }], 0, 0);
+    const currentState = sliceState([damagedCreature], 0, 0);
+    const expectedState = sliceState([{ ...damagedCreature, currentHp: damagedCreature.currentHp - 5 }], 0, 0);
 
-    expect(nextState(currentState, 0, -5)).toEqual(expectedState);
+    expect(nextState(currentState, damagedCreature.uuid, -5)).toEqual(expectedState);
   });
 
   it("cannot modify creature health to be less than zero", () => {
-    const currentState = sliceState([damagedCreatureInternal], 0, 0);
-    const expectedState = sliceState([{ ...damagedCreatureInternal, currentHp: 0 }], 0, 0);
+    const currentState = sliceState([damagedCreature], 0, 0);
+    const expectedState = sliceState([{ ...damagedCreature, currentHp: 0 }], 0, 0);
 
-    expect(nextState(currentState, 0, damagedCreature.maxHp * -2)).toEqual(expectedState);
+    expect(nextState(currentState, damagedCreature.uuid, damagedCreature.maxHp * -2)).toEqual(expectedState);
   });
 
   it("cannot modify creature health to be above its max hit points", () => {
-    const currentState = sliceState([damagedCreatureInternal], 0, 0);
-    const expectedState = sliceState([{ ...damagedCreatureInternal, currentHp: damagedCreature.maxHp }], 0, 0);
+    const currentState = sliceState([damagedCreature], 0, 0);
+    const expectedState = sliceState([{ ...damagedCreature, currentHp: damagedCreature.maxHp }], 0, 0);
 
-    expect(nextState(currentState, 0, damagedCreature.maxHp * 2)).toEqual(expectedState);
+    expect(nextState(currentState, damagedCreature.uuid, damagedCreature.maxHp * 2)).toEqual(expectedState);
   });
 
   it("updates a creature's health after they went in combat", () => {
-    const originalState = sliceState([damagedCreatureInternal, creature1Internal], 1, 1);
+    const originalState = sliceState([damagedCreature, creature1], 1, 1);
     const expectedState = sliceState(
-      [{ ...damagedCreatureInternal, currentHp: damagedCreature.currentHp + 5 }, creature1Internal],
+      [{ ...damagedCreature, currentHp: damagedCreature.currentHp + 5 }, creature1],
       1,
       1
     );
 
-    // update creature 1
-    expect(nextState(originalState, 1, 5)).toEqual(expectedState);
+    expect(nextState(originalState, damagedCreature.uuid, 5)).toEqual(expectedState);
   });
 });
 
 describe("reorderCreature", () => {
   const nextState = (
     state: ReturnType<typeof sliceState>,
-    fromIndex: number,
-    toIndex: number
-  ): ReturnType<typeof sliceState> => reducer(state, reorderCreature({ index: fromIndex, newIndex: toIndex }));
+    srcUuid: string,
+    destUuid: string
+  ): ReturnType<typeof sliceState> => reducer(state, reorderCreature({ srcUuid, destUuid }));
 
-  const [creature3, creature3Internal] = createCreature();
-  const threeCreaturesAdded = sliceState([creature1Internal, creature2Internal, creature3Internal], 0, 0);
+  const creature3 = createCreature({ initiative: 5 });
+  const threeCreaturesAdded = sliceState([creature1, creature2, creature3], 0, 0);
 
   it("sets the initiative to that of the creature it was moved onto", () => {
-    const expectedState = sliceState(
-      [creature2Internal, { ...creature1Internal, initiative: creature2.initiative, order: 1 }],
-      0,
-      0
-    );
+    const expectedState = sliceState([creature2, { ...creature1, initiative: creature2.initiative }], 0, 0);
 
-    expect(nextState(twoCreaturesAdded, 0, 1)).toEqual(expectedState);
+    expect(nextState(twoCreaturesAdded, creature1.uuid, creature2.uuid)).toEqual(expectedState);
   });
 
   it("is ordered before the creature it was moved onto if moved sooner in the order", () => {
-    const expectedState = sliceState(
-      [
-        { ...creature2Internal, initiative: creature1.initiative, order: 0 },
-        { ...creature1Internal, order: 1 },
-        creature3Internal
-      ],
-      0,
-      0
-    );
+    const expectedState = sliceState([creature1, { ...creature3, initiative: creature2.initiative }, creature2], 0, 0);
 
-    expect(nextState(threeCreaturesAdded, 1, 0)).toEqual(expectedState);
+    expect(nextState(threeCreaturesAdded, creature3.uuid, creature2.uuid)).toEqual(expectedState);
   });
 
   it("is ordered after the creature it was moved onto if moved later in the order", () => {
-    const expectedState = sliceState(
-      [
-        creature1Internal,
-        { ...creature3Internal, order: 0 },
-        { ...creature2Internal, initiative: creature3.initiative, order: 1 }
-      ],
-      0,
-      0
-    );
+    const expectedState = sliceState([creature2, { ...creature1, initiative: creature2.initiative }, creature3], 0, 0);
 
-    expect(nextState(threeCreaturesAdded, 1, 2)).toEqual(expectedState);
+    expect(nextState(threeCreaturesAdded, creature1.uuid, creature2.uuid)).toEqual(expectedState);
+  });
+
+  it("can reorder creatures to the beginning of initiative", () => {
+    const expectedState = sliceState([{ ...creature3, initiative: creature1.initiative }, creature1, creature2], 0, 0);
+
+    expect(nextState(threeCreaturesAdded, creature3.uuid, creature1.uuid)).toEqual(expectedState);
+  });
+
+  it("can reorder creatures to the end of initiative", () => {
+    const expectedState = sliceState([creature2, creature3, { ...creature1, initiative: creature3.initiative }], 0, 0);
+
+    expect(nextState(threeCreaturesAdded, creature1.uuid, creature3.uuid)).toEqual(expectedState);
+  });
+
+  it("does nothing if the creature is reordered to itself", () => {
+    expect(nextState(threeCreaturesAdded, creature1.uuid, creature1.uuid)).toEqual(threeCreaturesAdded);
+    expect(nextState(threeCreaturesAdded, creature2.uuid, creature2.uuid)).toEqual(threeCreaturesAdded);
+    expect(nextState(threeCreaturesAdded, creature3.uuid, creature3.uuid)).toEqual(threeCreaturesAdded);
+  });
+
+  describe("when combat has started", () => {
+    const creature4 = createCreature({ initiative: 2 });
+    const creature5 = createCreature({ initiative: 1 });
+    const fiveCreaturesAdded = sliceState([creature1, creature2, creature3, creature4, creature5], 2, 0);
+
+    it("reorders creatures who have already gone", () => {
+      // backwards
+      let expectedState = sliceState(
+        [{ ...creature2, initiative: creature1.initiative }, creature1, creature3, creature4, creature5],
+        2,
+        0
+      );
+
+      expect(nextState(fiveCreaturesAdded, creature2.uuid, creature1.uuid)).toEqual(expectedState);
+
+      // forwards
+      expectedState = sliceState(
+        [creature2, { ...creature1, initiative: creature2.initiative }, creature3, creature4, creature5],
+        2,
+        0
+      );
+
+      expect(nextState(fiveCreaturesAdded, creature1.uuid, creature2.uuid)).toEqual(expectedState);
+    });
+
+    it("reorders creatures who have not gone", () => {
+      // backwards
+      let expectedState = sliceState(
+        [creature1, creature2, creature3, { ...creature5, initiative: creature4.initiative }, creature4],
+        2,
+        0
+      );
+
+      expect(nextState(fiveCreaturesAdded, creature5.uuid, creature4.uuid)).toEqual(expectedState);
+
+      // forwards
+      expectedState = sliceState(
+        [creature1, creature2, creature3, creature5, { ...creature4, initiative: creature5.initiative }],
+        2,
+        0
+      );
+
+      expect(nextState(fiveCreaturesAdded, creature4.uuid, creature5.uuid)).toEqual(expectedState);
+    });
+
+    it("reorders creatures who have already gone to a position that has not gone", () => {
+      const expectedState = sliceState(
+        [creature2, creature3, { ...creature1, initiative: creature4.initiative }, creature4, creature5],
+        1, // should preserve the turn of creature3
+        0
+      );
+
+      expect(nextState(fiveCreaturesAdded, creature1.uuid, creature4.uuid)).toEqual(expectedState);
+    });
+
+    it("reorders creatures who have not gone to a position that have already gone", () => {
+      const expectedState = sliceState(
+        [creature1, { ...creature5, initiative: creature1.initiative }, creature2, creature3, creature4],
+        3, // should preserve the turn of creature3
+        0
+      );
+
+      expect(nextState(fiveCreaturesAdded, creature5.uuid, creature1.uuid)).toEqual(expectedState);
+    });
+
+    it("reorders a creature who has already gone to have their turn now", () => {
+      const expectedState = sliceState(
+        [creature2, { ...creature1, initiative: creature3.initiative }, creature3, creature4, creature5],
+        1,
+        0
+      );
+
+      expect(nextState(fiveCreaturesAdded, creature1.uuid, creature3.uuid)).toEqual(expectedState);
+    });
+
+    it("reorders the creature whose turn it is to have already gone", () => {
+      const expectedState = sliceState(
+        [creature1, { ...creature3, initiative: creature1.initiative }, creature2, creature4, creature5],
+        3,
+        0
+      );
+
+      expect(nextState(fiveCreaturesAdded, creature3.uuid, creature1.uuid)).toEqual(expectedState);
+    });
   });
 });
 
 describe("restartEncounter", () => {
-  const damagedCreature1Internal = internalCreature(externalCreature({ currentHp: 15, maxHp: 30 }));
-  const damagedCreature2Internal = internalCreature(externalCreature({ currentHp: 10, maxHp: 45 }));
+  const damagedcreature1 = createCreature({ currentHp: 15, maxHp: 30 });
+  const damagedcreature2 = createCreature({ currentHp: 10, maxHp: 45 });
 
-  const middleOfCombat = sliceState([damagedCreature1Internal, damagedCreature2Internal], 1, 2);
+  const middleOfCombat = sliceState([damagedcreature1, damagedcreature2], 1, 2);
 
   it("goes back to the start of first round", () => {
     const newState = reducer(middleOfCombat, restartEncounter());
@@ -441,7 +505,7 @@ describe("restartEncounter", () => {
   it("sets the current hit points of all creatures to their hit point maximum", () => {
     const newState = reducer(middleOfCombat, restartEncounter());
 
-    expect(newState.creatures.map((creature) => creature.currentHp)).toEqual([30, 45]);
+    expect(newState.sortedCreatureUuids.map((uuid) => newState.creatures[uuid].currentHp)).toEqual([30, 45]);
   });
 });
 
@@ -449,11 +513,11 @@ describe("clearEncounter", () => {
   it("removes all creatures from the initiative order", () => {
     const newState = reducer(twoCreaturesAdded, clearEncounter());
 
-    expect(newState.creatures.length).toEqual(0);
+    expect(Object.keys(newState.creatures).length).toEqual(0);
   });
 
   it("goes back to the start of the first round", () => {
-    const middleOfCombat = sliceState([creature1Internal, creature2Internal], 1, 2);
+    const middleOfCombat = sliceState([creature1, creature2], 1, 2);
     const newState = reducer(middleOfCombat, clearEncounter());
 
     expect(newState.currentTurn).toEqual(0);
@@ -477,24 +541,36 @@ describe("selectInitiativeRound", () => {
   });
 });
 
-describe("selectInitiativeCreatures", () => {
-  it("returns the list of creatures", () => {
-    const creatureList = [internalCreature(externalCreature()), internalCreature(externalCreature())];
+describe("selectCreatureByUuid", () => {
+  it("returns the requested uuid", () => {
+    const currentState = { initiativeTracker: twoCreaturesAdded } as unknown as RootState;
 
-    const currentState = {
-      initiativeTracker: { creatures: creatureList, currentTurn: 1, round: 2 }
-    } as unknown as RootState;
+    expect(selectCreatureByUuid(creature2.uuid)(currentState)).toEqual(creature2);
+  });
+});
 
-    expect(selectInitiativeCreatures(currentState)).toEqual(creatureList);
+describe("selectCreatureCurrentHp", () => {
+  it("returns the requested uuid", () => {
+    const currentState = { initiativeTracker: twoCreaturesAdded } as unknown as RootState;
+
+    expect(selectCreatureCurrentHp(creature2.uuid)(currentState)).toEqual(creature2.currentHp);
+  });
+});
+
+describe("selectCreatureMaxHp", () => {
+  it("returns the requested uuid", () => {
+    const currentState = { initiativeTracker: twoCreaturesAdded } as unknown as RootState;
+
+    expect(selectCreatureCurrentHp(creature2.uuid)(currentState)).toEqual(creature2.maxHp);
   });
 });
 
 describe("selectSortedInitiativeCreatures", () => {
   it("returns an ordered list of creatures where the first creature is whose turn it is", () => {
-    const secondCreaturesTurn = sliceState([creature1Internal, creature2Internal], 1, 0);
+    const secondCreaturesTurn = sliceState([creature1, creature2], 1, 0);
 
     const currentState = { initiativeTracker: secondCreaturesTurn } as unknown as RootState;
 
-    expect(selectSortedInitiativeCreatures(currentState)).toEqual([creature2Internal, creature1Internal]);
+    expect(selectSortedCreatureUuids(currentState)).toEqual([creature2.uuid, creature1.uuid]);
   });
 });
