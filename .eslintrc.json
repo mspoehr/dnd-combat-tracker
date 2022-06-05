@@ -18,6 +18,7 @@
     "react/react-in-jsx-scope": "off", // not needed in React 17+
     "eqeqeq": "error",
     "arrow-body-style": "warn",
+    "no-debugger": "warn",
     "prettier/prettier": [
       "error",
       {

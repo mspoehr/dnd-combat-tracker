@@ -1,16 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button, Form, Stack } from "react-bootstrap";
 
-import QuickAddModal from "./QuickAddModal";
-import { open, edit } from "./quickAddSlice";
+import AddCreaturesModal from "./AddCreaturesModal";
 import { useAppDispatch, useAppSelector } from "../../app/store";
 import {
   changeInitiative,
   deleteCreature,
-  InitiativeCreature as InitiativeCreatureType,
-  selectSortedInitiativeCreatures,
   rollAllInitiative,
-  reorderCreature
+  reorderCreature,
+  selectSortedCreatureUuids,
+  selectCreatureByUuid
 } from "./initiativeTrackerSlice";
 
 import "./DisplayInitiative.css";
@@ -23,9 +22,11 @@ import {
   DropResult,
   NotDraggingStyle
 } from "react-beautiful-dnd";
+import EditCreatureModal from "./EditCreatureModal";
 
-function InitiativeCreature(props: { creature: InitiativeCreatureType; index: number }) {
+function InitiativeCreature(props: { uuid: string; edit: (uuid: string) => void }) {
   const dispatch = useAppDispatch();
+  const creature = useAppSelector(selectCreatureByUuid(props.uuid));
 
   return (
     <div className="initiative-creature">
@@ -34,35 +35,36 @@ function InitiativeCreature(props: { creature: InitiativeCreatureType; index: nu
           <div>INITIATIVE</div>
           <Form.Control
             type="text"
-            value={props.creature.initiative ?? ""}
+            value={creature?.initiative ?? ""}
             style={{ width: "100px" }}
             className="text-center"
-            onChange={(e) => dispatch(changeInitiative({ index: props.index, newInitiative: e.target.value }))}
+            onChange={(e) => dispatch(changeInitiative({ uuid: props.uuid, newInitiative: e.target.value }))}
           />
         </div>
       </div>
       <div className="flex-grow-1 text-start">
         <div className="fw-bold" style={{ fontSize: "1.5em" }}>
-          {props.creature.name}
+          {creature?.name}
         </div>
-        <div>AC {props.creature.ac}</div>
+        <div>AC {creature?.ac}</div>
+        {creature?.initiativeMod !== undefined && <div>Init. Mod {creature.initiativeMod}</div>}
 
         <Stack direction="horizontal" gap={2}>
-          <Button onClick={() => dispatch(edit({ index: props.index, creature: props.creature }))}>Edit</Button>
-          <Button variant="danger" onClick={() => dispatch(deleteCreature(props.index))}>
+          <Button onClick={() => props.edit(props.uuid)}>Edit</Button>
+          <Button variant="danger" onClick={() => dispatch(deleteCreature(props.uuid))}>
             Delete
           </Button>
         </Stack>
       </div>
       <div>
-        <CreatureHealthTracker index={props.index} creature={props.creature} />
+        <CreatureHealthTracker uuid={props.uuid} />
       </div>
     </div>
   );
 }
 
 const DisplayInitiative: React.FunctionComponent = () => {
-  const initiativeCreatures = useAppSelector(selectSortedInitiativeCreatures);
+  const creatureUuids = useAppSelector(selectSortedCreatureUuids);
   const dispatch = useAppDispatch();
 
   const onDragEnd = (result: DropResult) => {
@@ -71,7 +73,12 @@ const DisplayInitiative: React.FunctionComponent = () => {
       return;
     }
 
-    dispatch(reorderCreature({ index: result.source.index, newIndex: result.destination.index }));
+    dispatch(
+      reorderCreature({
+        srcUuid: creatureUuids[result.source.index],
+        destUuid: creatureUuids[result.destination.index]
+      })
+    );
   };
 
   const getItemStyle = (
@@ -86,21 +93,25 @@ const DisplayInitiative: React.FunctionComponent = () => {
     opacity: isDragging ? 0.5 : 1
   });
 
+  const [addCreaturesOpen, setAddCreaturesOpen] = useState(false);
+  const [editCreatureUuid, setEditCreatureUuid] = useState<string | null>(null);
+
   return (
     <div>
       <Stack className="my-2" direction="horizontal" gap={2}>
-        <Button onClick={() => dispatch(open())}>Quick Add Creature</Button>
+        <Button onClick={() => setAddCreaturesOpen(true)}>Add Creatures</Button>
         <Button onClick={() => dispatch(rollAllInitiative())}>Roll Initiative</Button>
       </Stack>
-      <QuickAddModal />
+      <AddCreaturesModal open={addCreaturesOpen} setClosed={() => setAddCreaturesOpen(false)} />
+      <EditCreatureModal editUuid={editCreatureUuid} setClosed={() => setEditCreatureUuid(null)} />
 
       <div>
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="droppable">
             {(provided) => (
               <div {...provided.droppableProps} ref={provided.innerRef}>
-                {initiativeCreatures.map((creature, index) => (
-                  <Draggable key={creature.uuid} draggableId={creature.uuid} index={index}>
+                {creatureUuids.map((uuid, index) => (
+                  <Draggable key={uuid} draggableId={uuid} index={index}>
                     {(provided, snapshot) => (
                       <div
                         ref={provided.innerRef}
@@ -108,7 +119,7 @@ const DisplayInitiative: React.FunctionComponent = () => {
                         {...provided.dragHandleProps}
                         style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
                       >
-                        <InitiativeCreature key={creature.uuid} creature={creature} index={index} />
+                        <InitiativeCreature key={uuid} uuid={uuid} edit={(uuid) => setEditCreatureUuid(uuid)} />
                       </div>
                     )}
                   </Draggable>
