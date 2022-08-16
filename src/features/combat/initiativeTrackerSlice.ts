@@ -66,6 +66,17 @@ export const initiativeTrackerSlice = createSlice({
       state.creatures[action.payload.uuid] = { ...state.creatures[action.payload.uuid], ...action.payload };
       sortInitiative(state);
     },
+    copyCreature: (state, action: PayloadAction<{ srcUuid: string; copyUuid: string }>) => {
+      preservingCurrentTurn(state, () => {
+        state.creatures[action.payload.copyUuid] = {
+          ...state.creatures[action.payload.srcUuid],
+          uuid: action.payload.copyUuid
+        };
+
+        const srcIndex = _.indexOf(state.sortedCreatureUuids, action.payload.srcUuid);
+        state.sortedCreatureUuids.splice(srcIndex + 1, 0, action.payload.copyUuid);
+      });
+    },
     previous: (state) => {
       state.currentTurn--;
 
@@ -157,6 +168,7 @@ export const {
   addCreatures,
   deleteCreature,
   editCreature,
+  copyCreature,
   changeInitiative,
   next,
   previous,

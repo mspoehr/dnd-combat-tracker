@@ -9,7 +9,8 @@ import {
   rollAllInitiative,
   reorderCreature,
   selectSortedCreatureUuids,
-  selectCreatureByUuid
+  selectCreatureByUuid,
+  copyCreature
 } from "./initiativeTrackerSlice";
 
 import "./DisplayInitiative.css";
@@ -23,6 +24,7 @@ import {
   NotDraggingStyle
 } from "react-beautiful-dnd";
 import EditCreatureModal from "./EditCreatureModal";
+import { v4 as uuidv4 } from "uuid";
 
 function InitiativeCreature(props: { uuid: string; edit: (uuid: string) => void }) {
   const dispatch = useAppDispatch();
@@ -51,6 +53,9 @@ function InitiativeCreature(props: { uuid: string; edit: (uuid: string) => void 
 
         <Stack direction="horizontal" gap={2}>
           <Button onClick={() => props.edit(props.uuid)}>Edit</Button>
+          {creature && (
+            <Button onClick={() => dispatch(copyCreature({ srcUuid: creature.uuid, copyUuid: uuidv4() }))}>Copy</Button>
+          )}
           <Button variant="danger" onClick={() => dispatch(deleteCreature(props.uuid))}>
             Delete
           </Button>
