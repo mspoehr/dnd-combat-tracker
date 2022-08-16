@@ -14,7 +14,8 @@ import reducer, {
   selectInitiativeRound,
   selectSortedCreatureUuids,
   selectCreatureByUuid,
-  selectCreatureCurrentHp
+  selectCreatureCurrentHp,
+  copyCreature
 } from "./initiativeTrackerSlice";
 import { CreatureType } from "../../common/models";
 import { RootState } from "../../app/store";
@@ -202,6 +203,37 @@ describe("editCreature", () => {
     const expectedState = sliceState([creature1, { ...creature2, ...thisUpdates }], 0, 0);
 
     expect(nextState(twoCreaturesAdded, creature2.uuid, thisUpdates)).toEqual(expectedState);
+  });
+});
+
+describe("copyCreature", () => {
+  const nextState = (
+    state: ReturnType<typeof sliceState>,
+    srcUuid: string,
+    copyUuid: string
+  ): ReturnType<typeof sliceState> => reducer(state, copyCreature({ srcUuid, copyUuid }));
+
+  const copyUuid = uuidv4();
+
+  it("duplicates a creature", () => {
+    const expectedState = sliceState([creature1, { ...creature1, uuid: copyUuid }], 0, 0);
+
+    expect(nextState(oneCreatureAdded, creature1.uuid, copyUuid)).toEqual(expectedState);
+  });
+
+  it("inserts new creature right after the source creature", () => {
+    const sameInitCreature2 = { ...creature2, initiative: creature1.initiative };
+    const origState = sliceState([creature1, sameInitCreature2], 0, 0);
+    const expectedState = sliceState([creature1, { ...creature1, uuid: copyUuid }, sameInitCreature2], 0, 0);
+
+    expect(nextState(origState, creature1.uuid, copyUuid)).toEqual(expectedState);
+  });
+
+  it("preserves the turn of the current creature", () => {
+    const originalState = sliceState([creature1, creature2], 1, 1);
+    const expectedState = sliceState([creature1, { ...creature1, uuid: copyUuid }, creature2], 2, 1);
+
+    expect(nextState(originalState, creature1.uuid, copyUuid)).toEqual(expectedState);
   });
 });
 
