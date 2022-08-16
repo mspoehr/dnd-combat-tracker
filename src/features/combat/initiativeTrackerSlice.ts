@@ -7,6 +7,7 @@ export interface InitiativeCreature extends Creature {
   initiative: number;
   initiativeMod?: number;
   currentHp: number;
+  notes: string;
 }
 
 const initialState = {

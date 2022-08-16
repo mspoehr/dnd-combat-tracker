@@ -22,7 +22,8 @@ const defaultFormCreature = {
   initiative: "",
   initiativeMod: "",
   type: "monster" as CreatureType,
-  quantity: ""
+  quantity: "",
+  notes: ""
 };
 interface AddFormCreature extends Omit<FormInitiativeCreature, "currentHp" | "uuid"> {
   quantity: string;

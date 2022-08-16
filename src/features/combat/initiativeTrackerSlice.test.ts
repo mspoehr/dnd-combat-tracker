@@ -31,6 +31,7 @@ const createCreature = (attributes?: Partial<InitiativeCreature>): InitiativeCre
   maxHp: 30,
   ac: Math.floor(Math.random() * 10) + 10,
   type: "monster",
+  notes: "",
   ...attributes
 });
 
