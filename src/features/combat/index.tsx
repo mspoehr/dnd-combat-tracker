@@ -7,7 +7,8 @@ import {
   selectInitiativeRound,
   selectInitiativeTurn,
   restartEncounter,
-  clearEncounter
+  clearEncounter,
+  removeAllMonsters
 } from "./initiativeTrackerSlice";
 import { useAppDispatch, useAppSelector } from "../../app/store";
 
@@ -50,6 +51,9 @@ function InitiativeControlBar() {
               </Dropdown.Item>
               <Dropdown.Item as="button" onClick={() => dispatch(clearEncounter())}>
                 Clear initiative order
+              </Dropdown.Item>
+              <Dropdown.Item as="button" onClick={() => dispatch(removeAllMonsters())}>
+                Remove all monsters
               </Dropdown.Item>
             </DropdownButton>
           </Stack>

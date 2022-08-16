@@ -160,7 +160,21 @@ export const initiativeTrackerSlice = createSlice({
         state.creatures[uuid].currentHp = state.creatures[uuid].maxHp;
       });
     },
-    clearEncounter: () => JSON.parse(JSON.stringify(initialState))
+    clearEncounter: () => JSON.parse(JSON.stringify(initialState)),
+    removeAllMonsters: (state) => {
+      state.currentTurn = 0;
+      state.round = 0;
+
+      const playerUuids: string[] = [];
+      _.clone(state.sortedCreatureUuids).forEach((uuid) => {
+        if (state.creatures[uuid].type === "monster") {
+          delete state.creatures[uuid];
+        } else {
+          playerUuids.push(uuid);
+        }
+      });
+      state.sortedCreatureUuids = playerUuids;
+    }
   }
 });
 
@@ -176,7 +190,8 @@ export const {
   rollAllInitiative,
   reorderCreature,
   restartEncounter,
-  clearEncounter
+  clearEncounter,
+  removeAllMonsters
 } = initiativeTrackerSlice.actions;
 export const selectInitiativeTurn = (state: RootState): number => state.initiativeTracker.currentTurn;
 export const selectInitiativeRound = (state: RootState): number => state.initiativeTracker.round;

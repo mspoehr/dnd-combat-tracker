@@ -15,7 +15,8 @@ import reducer, {
   selectSortedCreatureUuids,
   selectCreatureByUuid,
   selectCreatureCurrentHp,
-  copyCreature
+  copyCreature,
+  removeAllMonsters
 } from "./initiativeTrackerSlice";
 import { CreatureType } from "../../common/models";
 import { RootState } from "../../app/store";
@@ -554,6 +555,39 @@ describe("clearEncounter", () => {
 
     expect(newState.currentTurn).toEqual(0);
     expect(newState.round).toEqual(0);
+  });
+});
+
+describe("removeAllMonsters", () => {
+  const player1 = createCreature({ initiative: creature1.initiative - 1, type: "player" });
+  const player2 = createCreature({ initiative: creature2.initiative - 1, type: "player" });
+
+  it("goes back to the start of the first round", () => {
+    const middleOfCombat = sliceState([creature1, creature2], 1, 2);
+    const newState = reducer(middleOfCombat, clearEncounter());
+
+    expect(newState.currentTurn).toEqual(0);
+    expect(newState.round).toEqual(0);
+  });
+
+  it("removes all monsters", () => {
+    const newState = reducer(twoCreaturesAdded, removeAllMonsters());
+
+    expect(newState).toEqual(emptyTurnOrder);
+  });
+
+  it("leaves the players in the order", () => {
+    const origState = sliceState([creature1, player1, creature2, player2], 0, 0);
+
+    const newState = reducer(origState, removeAllMonsters());
+    expect(newState).toEqual(sliceState([player1, player2], 0, 0));
+  });
+
+  it("does not mess up order if combat has started", () => {
+    const origState = sliceState([creature1, player1, creature2, player2], 2, 1);
+
+    const newState = reducer(origState, removeAllMonsters());
+    expect(newState).toEqual(sliceState([player1, player2], 0, 0));
   });
 });
 
