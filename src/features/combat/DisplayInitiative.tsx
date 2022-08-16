@@ -10,7 +10,8 @@ import {
   reorderCreature,
   selectSortedCreatureUuids,
   selectCreatureByUuid,
-  copyCreature
+  copyCreature,
+  editCreature
 } from "./initiativeTrackerSlice";
 
 import "./DisplayInitiative.css";
@@ -60,6 +61,14 @@ function InitiativeCreature(props: { uuid: string; edit: (uuid: string) => void 
             Delete
           </Button>
         </Stack>
+
+        <Form.Control
+          type="text"
+          as="textarea"
+          value={creature?.notes ?? ""}
+          placeholder="Notes"
+          onChange={(e) => dispatch(editCreature({ uuid: creature?.uuid ?? "", notes: e.target.value }))}
+        />
       </div>
       <div>
         <CreatureHealthTracker uuid={props.uuid} />
