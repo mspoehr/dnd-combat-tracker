@@ -16,14 +16,7 @@ import {
 
 import "./DisplayInitiative.css";
 import CreatureHealthTracker from "./CreatureHealthTracker";
-import {
-  DragDropContext,
-  Draggable,
-  DraggingStyle,
-  Droppable,
-  DropResult,
-  NotDraggingStyle
-} from "react-beautiful-dnd";
+import { DragDropContext, Draggable, DraggingStyle, Droppable, DropResult, NotDraggingStyle } from "@hello-pangea/dnd";
 import EditCreatureModal from "./EditCreatureModal";
 import { v4 as uuidv4 } from "uuid";
 

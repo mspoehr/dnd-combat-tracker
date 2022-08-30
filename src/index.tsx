@@ -13,8 +13,8 @@ const root = createRoot(container!);
 
 root.render(
   <Provider store={store}>
-    {/* TOOD: someday, reenable strictmode. react-beautiful-dnd does not support React 18, and breaks with strict mode on */}
-    <React.StrictMode></React.StrictMode>
-    <App />
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
   </Provider>
 );
